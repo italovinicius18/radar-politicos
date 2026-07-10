@@ -25,14 +25,21 @@ export default function Perfil() {
     setAno(undefined)
     setCategoria('')
     setPagina(1)
-    if (id) obterResumo(id).then(setResumo).catch((e) => setErro(e.message))
+    if (!id) return
+    let ativo = true
+    obterResumo(id)
+      .then((r) => { if (ativo) setResumo(r) })
+      .catch((e) => { if (ativo) setErro(e.message) })
+    return () => { ativo = false }
   }, [id])
 
   useEffect(() => {
-    if (id)
-      obterDespesas(id, { ano, categoria: categoria || undefined, pagina, ordenar: '-data' })
-        .then(setDespesas)
-        .catch((e) => setErro(e.message))
+    if (!id) return
+    let ativo = true
+    obterDespesas(id, { ano, categoria: categoria || undefined, pagina, ordenar: '-data' })
+      .then((d) => { if (ativo) setDespesas(d) })
+      .catch((e) => { if (ativo) setErro(e.message) })
+    return () => { ativo = false }
   }, [id, ano, categoria, pagina])
 
   if (erro) return <p className="cartao">⚠️ {erro}</p>
