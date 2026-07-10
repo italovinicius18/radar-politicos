@@ -24,7 +24,7 @@ def criar_app(db_path: str) -> FastAPI:
         cargo: str | None = None,
         partido: str | None = None,
         uf: str | None = None,
-        limite: int = Query(20, le=100),
+        limite: int = Query(20, ge=1, le=100),
     ):
         sql = f"SELECT {', '.join(COLUNAS_POLITICO)} FROM politicos WHERE 1=1"
         parametros: list = []
@@ -108,7 +108,7 @@ def criar_app(db_path: str) -> FastAPI:
         fornecedor: str | None = None,
         ordenar: str = "-data",
         pagina: int = Query(1, ge=1),
-        por_pagina: int = Query(50, le=200),
+        por_pagina: int = Query(50, ge=1, le=200),
     ):
         if ordenar not in ORDENACOES:
             raise HTTPException(422, f"ordenar deve ser um de: {sorted(ORDENACOES)}")
@@ -152,7 +152,7 @@ def criar_app(db_path: str) -> FastAPI:
         ano: int | None = None,
         cargo: str | None = None,
         categoria: str | None = None,
-        limite: int = Query(20, le=100),
+        limite: int = Query(20, ge=1, le=100),
     ):
         filtro = "1=1"
         parametros: list = []

@@ -72,3 +72,12 @@ def test_rankings(cliente):
 def test_rankings_filtro_cargo_e_categoria(cliente):
     r = cliente.get("/api/rankings", params={"cargo": "Senador"})
     assert [x["politico"]["id"] for x in r.json()] == ["senado-joao-neto"]
+
+
+def test_por_pagina_negativo_422(cliente):
+    r = cliente.get("/api/politicos/camara-1/despesas", params={"por_pagina": -5})
+    assert r.status_code == 422
+
+
+def test_rankings_limite_negativo_422(cliente):
+    assert cliente.get("/api/rankings", params={"limite": -1}).status_code == 422
