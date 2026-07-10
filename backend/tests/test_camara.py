@@ -6,6 +6,10 @@ from radar.ingest.fontes import camara
 FIXTURE = Path(__file__).parent / "fixtures" / "ceap_amostra.csv"
 
 
+def test_fixture_tem_bom():
+    assert FIXTURE.read_bytes().startswith(b"\xef\xbb\xbf")
+
+
 def test_parse_ignora_liderancas_e_gera_pares():
     pares = list(camara.parse(FIXTURE))
     assert len(pares) == 2  # linha de liderança (sem ideCadastro) ignorada
