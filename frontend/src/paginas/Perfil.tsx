@@ -19,6 +19,12 @@ export default function Perfil() {
   const [erro, setErro] = useState('')
 
   useEffect(() => {
+    setResumo(null)
+    setDespesas(null)
+    setErro('')
+    setAno(undefined)
+    setCategoria('')
+    setPagina(1)
     if (id) obterResumo(id).then(setResumo).catch((e) => setErro(e.message))
   }, [id])
 
@@ -33,7 +39,8 @@ export default function Perfil() {
   if (!resumo) return <p>Carregando...</p>
 
   const { politico } = resumo
-  const totalPaginas = despesas ? Math.ceil(despesas.total_itens / despesas.por_pagina) : 1
+  const categoriasComGasto = resumo.por_categoria.filter((c) => c.total > 0)
+  const totalPaginas = despesas ? Math.max(1, Math.ceil(despesas.total_itens / despesas.por_pagina)) : 1
 
   return (
     <div>
@@ -68,13 +75,13 @@ export default function Perfil() {
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie
-                data={resumo.por_categoria.filter((c) => c.total > 0)}
+                data={categoriasComGasto}
                 dataKey="total"
                 nameKey="categoria"
                 innerRadius={50}
                 outerRadius={90}
               >
-                {resumo.por_categoria.map((c, i) => (
+                {categoriasComGasto.map((c, i) => (
                   <Cell key={c.categoria} fill={CORES[i % CORES.length]} />
                 ))}
               </Pie>
