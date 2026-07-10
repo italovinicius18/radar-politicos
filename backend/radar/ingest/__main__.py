@@ -45,6 +45,7 @@ def main() -> int:
         atualizados = senado.enriquecer(con)
         print(f"✔ senadores enriquecidos (partido/uf/foto): {atualizados}")
     except Exception as e:
+        falhas.append(("senado", "enriquecimento", str(e)))
         print(f"✖ enriquecimento de senadores: {e}", file=sys.stderr)
 
     total = sum(n for _, _, n in sucesso)
