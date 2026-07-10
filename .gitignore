@@ -1,0 +1,8 @@
+dados/
+*.duckdb
+*.duckdb.wal
+__pycache__/
+.venv/
+node_modules/
+frontend/dist/
+.pytest_cache/
