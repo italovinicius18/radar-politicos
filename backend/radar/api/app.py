@@ -180,3 +180,7 @@ def criar_app(db_path: str) -> FastAPI:
         ]
 
     return app
+
+
+def app_padrao() -> FastAPI:
+    return criar_app("../dados/radar.duckdb")
