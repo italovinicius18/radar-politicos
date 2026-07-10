@@ -8,11 +8,14 @@ export default function Busca() {
   const [erro, setErro] = useState('')
 
   useEffect(() => {
-    if (busca.trim().length < 3) { setResultados([]); return }
+    if (busca.trim().length < 3) { setResultados([]); setErro(''); return }
+    let ativo = true
     const timer = setTimeout(() => {
-      buscarPoliticos(busca).then(setResultados).catch((e) => setErro(e.message))
+      buscarPoliticos(busca)
+        .then((r) => { if (ativo) { setResultados(r); setErro('') } })
+        .catch((e) => { if (ativo) setErro(e.message) })
     }, 300)
-    return () => clearTimeout(timer)
+    return () => { ativo = false; clearTimeout(timer) }
   }, [busca])
 
   return (

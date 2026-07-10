@@ -56,12 +56,12 @@ export const buscarPoliticos = (busca: string) =>
   obter<Politico[]>('/api/politicos', { busca })
 
 export const obterResumo = (id: string, anoInicio?: number, anoFim?: number) =>
-  obter<Resumo>(`/api/politicos/${id}/resumo`, { ano_inicio: anoInicio, ano_fim: anoFim })
+  obter<Resumo>(`/api/politicos/${encodeURIComponent(id)}/resumo`, { ano_inicio: anoInicio, ano_fim: anoFim })
 
 export const obterDespesas = (
   id: string,
   filtros: { ano?: number; categoria?: string; ordenar?: string; pagina?: number },
-) => obter<PaginaDespesas>(`/api/politicos/${id}/despesas`, filtros)
+) => obter<PaginaDespesas>(`/api/politicos/${encodeURIComponent(id)}/despesas`, filtros)
 
 export const obterRankings = (filtros: { ano?: number; cargo?: string; categoria?: string }) =>
   obter<ItemRanking[]>('/api/rankings', filtros)
