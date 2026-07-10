@@ -58,6 +58,11 @@ def test_normalizar_categoria_desconhecida_vira_titulo():
     assert normalizar_categoria("CATEGORIA NOVA QUALQUER") == "Categoria Nova Qualquer"
 
 
+def test_normalizar_categoria_vazia():
+    assert normalizar_categoria("") == "Não especificada"
+    assert normalizar_categoria("   ") == "Não especificada"
+
+
 def test_slug_e_sem_acento():
     assert slug("João da Silva") == "joao-da-silva"
     assert sem_acento("José ÁVILA") == "jose avila"

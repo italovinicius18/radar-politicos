@@ -59,8 +59,11 @@ _REGRAS_CATEGORIA = [
 
 
 def normalizar_categoria(original: str) -> str:
+    original = (original or "").strip()
+    if not original:
+        return "Não especificada"
     chave = sem_acento(original).upper()
     for padrao, categoria in _REGRAS_CATEGORIA:
         if padrao in chave:
             return categoria
-    return original.strip().title()
+    return original.title()
