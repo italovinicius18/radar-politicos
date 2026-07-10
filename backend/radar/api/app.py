@@ -89,4 +89,94 @@ def criar_app(db_path: str) -> FastAPI:
             ],
         }
 
+    ORDENACOES = {
+        "data": "data ASC NULLS LAST",
+        "-data": "data DESC NULLS LAST",
+        "valor": "valor ASC",
+        "-valor": "valor DESC",
+    }
+    COLUNAS_DESPESA = (
+        "ano", "mes", "data", "categoria", "categoria_original", "descricao",
+        "fornecedor", "fornecedor_cnpj", "valor", "documento_url", "fonte",
+    )
+
+    @app.get("/api/politicos/{politico_id}/despesas")
+    def despesas(
+        politico_id: str,
+        ano: int | None = None,
+        categoria: str | None = None,
+        fornecedor: str | None = None,
+        ordenar: str = "-data",
+        pagina: int = Query(1, ge=1),
+        por_pagina: int = Query(50, le=200),
+    ):
+        if ordenar not in ORDENACOES:
+            raise HTTPException(422, f"ordenar deve ser um de: {sorted(ORDENACOES)}")
+        filtro = "politico_id = ?"
+        parametros: list = [politico_id]
+        if ano is not None:
+            filtro += " AND ano = ?"
+            parametros.append(ano)
+        if categoria:
+            filtro += " AND categoria = ?"
+            parametros.append(categoria)
+        if fornecedor:
+            filtro += " AND strip_accents(lower(fornecedor)) LIKE '%' || strip_accents(lower(?)) || '%'"
+            parametros.append(fornecedor)
+        with con() as c:
+            _buscar_politico(c, politico_id)
+            total_itens = c.execute(
+                f"SELECT count(*) FROM despesas WHERE {filtro}", parametros
+            ).fetchone()[0]
+            linhas = c.execute(
+                f"""SELECT {', '.join(COLUNAS_DESPESA)} FROM despesas WHERE {filtro}
+                    ORDER BY {ORDENACOES[ordenar]} LIMIT ? OFFSET ?""",
+                parametros + [por_pagina, (pagina - 1) * por_pagina],
+            ).fetchall()
+        return {
+            "total_itens": total_itens,
+            "pagina": pagina,
+            "por_pagina": por_pagina,
+            "itens": [
+                {
+                    **dict(zip(COLUNAS_DESPESA, l)),
+                    "data": l[2].isoformat() if l[2] else None,
+                    "valor": float(l[8]),
+                }
+                for l in linhas
+            ],
+        }
+
+    @app.get("/api/rankings")
+    def rankings(
+        ano: int | None = None,
+        cargo: str | None = None,
+        categoria: str | None = None,
+        limite: int = Query(20, le=100),
+    ):
+        filtro = "1=1"
+        parametros: list = []
+        if ano is not None:
+            filtro += " AND d.ano = ?"
+            parametros.append(ano)
+        if cargo:
+            filtro += " AND p.cargo = ?"
+            parametros.append(cargo)
+        if categoria:
+            filtro += " AND d.categoria = ?"
+            parametros.append(categoria)
+        with con() as c:
+            linhas = c.execute(
+                f"""SELECT {', '.join('p.' + col for col in COLUNAS_POLITICO)},
+                           sum(d.valor) AS total
+                    FROM despesas d JOIN politicos p ON p.id = d.politico_id
+                    WHERE {filtro}
+                    GROUP BY {', '.join('p.' + col for col in COLUNAS_POLITICO)}
+                    ORDER BY total DESC LIMIT ?""",
+                parametros + [limite],
+            ).fetchall()
+        return [
+            {"politico": _politico_dict(l[:-1]), "total": float(l[-1])} for l in linhas
+        ]
+
     return app
