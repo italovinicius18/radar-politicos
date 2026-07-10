@@ -1,0 +1,31 @@
+def test_busca_sem_acento(cliente):
+    r = cliente.get("/api/politicos", params={"busca": "jose avila"})
+    assert r.status_code == 200
+    assert [p["id"] for p in r.json()] == ["camara-1"]
+
+
+def test_busca_com_filtros(cliente):
+    r = cliente.get("/api/politicos", params={"cargo": "Senador"})
+    assert [p["id"] for p in r.json()] == ["senado-joao-neto"]
+
+
+def test_resumo_totais(cliente):
+    r = cliente.get("/api/politicos/camara-1/resumo")
+    assert r.status_code == 200
+    corpo = r.json()
+    assert corpo["politico"]["nome"] == "José Ávila"
+    assert corpo["total"] == 1100.00  # 1000 + 300 - 200 (estorno subtrai)
+    assert {"ano": 2024, "total": 1300.00} in corpo["por_ano"]
+    assert {"ano": 2025, "total": -200.00} in corpo["por_ano"]
+    categorias = {c["categoria"]: c["total"] for c in corpo["por_categoria"]}
+    assert categorias["Passagens"] == 800.00
+    assert corpo["top_fornecedores"][0]["fornecedor"] == "TAM"
+
+
+def test_resumo_filtro_ano(cliente):
+    r = cliente.get("/api/politicos/camara-1/resumo", params={"ano_inicio": 2025})
+    assert r.json()["total"] == -200.00
+
+
+def test_resumo_politico_inexistente_404(cliente):
+    assert cliente.get("/api/politicos/nao-existe/resumo").status_code == 404
