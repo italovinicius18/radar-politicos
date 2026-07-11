@@ -179,6 +179,109 @@ def criar_app(db_path: str) -> FastAPI:
             {"politico": _politico_dict(l[:-1]), "total": float(l[-1])} for l in linhas
         ]
 
+    @app.get("/api/visao-geral")
+    def visao_geral(ano: int | None = None):
+        with con() as c:
+            if ano is None:
+                ano = c.execute("SELECT coalesce(max(ano), 0) FROM despesas").fetchone()[0]
+            total, num_despesas, meses = c.execute(
+                "SELECT coalesce(sum(valor), 0), count(*), coalesce(max(mes), 0) "
+                "FROM despesas WHERE ano = ?",
+                (ano,),
+            ).fetchone()
+            anterior = c.execute(
+                "SELECT coalesce(sum(valor), 0) FROM despesas WHERE ano = ? AND mes <= ?",
+                (ano - 1, meses),
+            ).fetchone()[0]
+            cargos = dict(
+                c.execute(
+                    """SELECT p.cargo, count(DISTINCT d.politico_id)
+                       FROM despesas d JOIN politicos p ON p.id = d.politico_id
+                       WHERE d.ano = ? GROUP BY p.cargo""",
+                    (ano,),
+                ).fetchall()
+            )
+            deputados = cargos.get("Deputado Federal", 0)
+            senadores = cargos.get("Senador", 0)
+            parlamentares = deputados + senadores
+            nota = c.execute(
+                f"""SELECT d.valor, d.categoria, d.fornecedor, d.data,
+                           {', '.join('p.' + col for col in COLUNAS_POLITICO)}
+                    FROM despesas d JOIN politicos p ON p.id = d.politico_id
+                    WHERE d.ano = ? ORDER BY d.valor DESC LIMIT 1""",
+                (ano,),
+            ).fetchone()
+            por_mes = c.execute(
+                "SELECT mes, sum(valor) FROM despesas WHERE ano = ? AND mes IS NOT NULL "
+                "GROUP BY mes ORDER BY mes",
+                (ano,),
+            ).fetchall()
+            camara_senado = c.execute(
+                "SELECT fonte, sum(valor), count(DISTINCT politico_id) "
+                "FROM despesas WHERE ano = ? GROUP BY fonte ORDER BY fonte",
+                (ano,),
+            ).fetchall()
+            gastadores = c.execute(
+                f"""SELECT {', '.join('p.' + col for col in COLUNAS_POLITICO)},
+                           sum(d.valor) AS total
+                    FROM despesas d JOIN politicos p ON p.id = d.politico_id
+                    WHERE d.ano = ?
+                    GROUP BY {', '.join('p.' + col for col in COLUNAS_POLITICO)}
+                    ORDER BY total DESC LIMIT 5""",
+                (ano,),
+            ).fetchall()
+            categorias = c.execute(
+                "SELECT categoria, sum(valor) AS t FROM despesas WHERE ano = ? "
+                "GROUP BY categoria ORDER BY t DESC LIMIT 5",
+                (ano,),
+            ).fetchall()
+            fornecedores = c.execute(
+                """SELECT fornecedor, coalesce(fornecedor_cnpj, '') AS cnpj,
+                          sum(valor) AS t, count(*) AS q
+                   FROM despesas WHERE ano = ? AND fornecedor IS NOT NULL
+                   GROUP BY fornecedor, cnpj ORDER BY t DESC LIMIT 5""",
+                (ano,),
+            ).fetchall()
+        total = float(total)
+        anterior = float(anterior)
+        return {
+            "ano": ano,
+            "kpis": {
+                "total": total,
+                "total_mesmo_periodo_anterior": anterior,
+                "variacao_pct": ((total - anterior) / anterior * 100) if anterior else None,
+                "meses_com_dados": meses,
+                "parlamentares": parlamentares,
+                "deputados": deputados,
+                "senadores": senadores,
+                "media_por_parlamentar": total / parlamentares if parlamentares else 0.0,
+                "num_despesas": num_despesas,
+                "nota_mais_cara": {
+                    "valor": float(nota[0]),
+                    "categoria": nota[1],
+                    "fornecedor": nota[2],
+                    "data": nota[3].isoformat() if nota[3] else None,
+                    "politico": _politico_dict(nota[4:]),
+                }
+                if nota
+                else None,
+            },
+            "por_mes": [{"mes": m, "total": float(t)} for m, t in por_mes],
+            "camara_senado": [
+                {"fonte": f, "total": float(t), "parlamentares": q}
+                for f, t, q in camara_senado
+            ],
+            "top_gastadores": [
+                {"politico": _politico_dict(l[:-1]), "total": float(l[-1])}
+                for l in gastadores
+            ],
+            "top_categorias": [{"categoria": cat, "total": float(t)} for cat, t in categorias],
+            "top_fornecedores": [
+                {"fornecedor": f, "cnpj": cnpj, "total": float(t), "quantidade": q}
+                for f, cnpj, t, q in fornecedores
+            ],
+        }
+
     return app
 
 
