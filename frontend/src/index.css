@@ -26,3 +26,27 @@ button:disabled { opacity: 0.4; cursor: default; }
 .total-destaque { font-size: 1.6rem; font-weight: 700; color: #0a5c36; }
 .graficos { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media (max-width: 800px) { .graficos { grid-template-columns: 1fr; } }
+.panorama-titulo { display: flex; align-items: center; gap: 0.8rem; margin-top: 1.6rem; }
+.panorama-titulo h2 { margin: 0; }
+.panorama-titulo select { padding: 0.3rem 0.5rem; border: 1px solid #ccc; border-radius: 6px; }
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+@media (max-width: 800px) { .tiles { grid-template-columns: 1fr 1fr; } }
+.tile small { color: #666; display: block; }
+.tile-valor { font-size: 1.5rem; font-weight: 700; color: #0a5c36; margin: 0.2rem 0; }
+.split-bar { display: flex; gap: 2px; height: 28px; border-radius: 6px; overflow: hidden; margin: 0.8rem 0; }
+.split-parte { min-width: 4px; }
+.split-legenda { display: flex; align-items: center; gap: 0.5rem; margin: 0.3rem 0; font-size: 0.9rem; }
+.pino { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.tops { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+@media (max-width: 900px) { .tops { grid-template-columns: 1fr; } }
+.top-linha { display: flex; align-items: center; gap: 0.6rem; padding: 0.45rem 0; border-bottom: 1px solid #eee; color: #1a1a1a; }
+.top-linha:last-child { border-bottom: none; }
+.top-linha img { width: 34px; height: 42px; object-fit: cover; border-radius: 4px; background: #ddd; }
+.top-posicao { color: #666; width: 1.6rem; }
+.top-nome { flex: 1; min-width: 0; }
+.top-nome small { display: block; color: #666; }
+.top-valor { font-weight: 600; white-space: nowrap; }
+.minibar-linha { margin: 0.5rem 0; }
+.minibar-rotulo { display: flex; justify-content: space-between; font-size: 0.9rem; gap: 0.5rem; }
+.minibar-trilha { background: #eee; border-radius: 4px; height: 8px; margin-top: 0.25rem; }
+.minibar { background: #1d7a4d; height: 8px; border-radius: 4px; min-width: 2px; }

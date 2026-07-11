@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { buscarPoliticos, type Politico } from '../lib/api'
+import Panorama from './Panorama'
 
 export default function Busca() {
   const [busca, setBusca] = useState('')
@@ -47,6 +48,7 @@ export default function Busca() {
       {busca.trim().length >= 3 && resultados.length === 0 && !erro && (
         <p>Nenhum político encontrado.</p>
       )}
+      {busca.trim().length < 3 && <Panorama />}
     </div>
   )
 }

@@ -42,6 +42,35 @@ export interface ItemRanking {
   total: number
 }
 
+export interface NotaMaisCara {
+  valor: number
+  categoria: string
+  fornecedor: string | null
+  data: string | null
+  politico: Politico
+}
+
+export interface VisaoGeral {
+  ano: number
+  kpis: {
+    total: number
+    total_mesmo_periodo_anterior: number
+    variacao_pct: number | null
+    meses_com_dados: number
+    parlamentares: number
+    deputados: number
+    senadores: number
+    media_por_parlamentar: number
+    num_despesas: number
+    nota_mais_cara: NotaMaisCara | null
+  }
+  por_mes: { mes: number; total: number }[]
+  camara_senado: { fonte: string; total: number; parlamentares: number }[]
+  top_gastadores: ItemRanking[]
+  top_categorias: { categoria: string; total: number }[]
+  top_fornecedores: { fornecedor: string; cnpj: string; total: number; quantidade: number }[]
+}
+
 async function obter<T>(caminho: string, parametros: Record<string, string | number | undefined>): Promise<T> {
   const query = new URLSearchParams()
   for (const [chave, valor] of Object.entries(parametros)) {
@@ -65,3 +94,6 @@ export const obterDespesas = (
 
 export const obterRankings = (filtros: { ano?: number; cargo?: string; categoria?: string }) =>
   obter<ItemRanking[]>('/api/rankings', filtros)
+
+export const obterVisaoGeral = (ano?: number) =>
+  obter<VisaoGeral>('/api/visao-geral', { ano })
