@@ -1,0 +1,23 @@
+{
+  "ListaParlamentarLegislatura": {
+    "Parlamentares": {
+      "Parlamentar": [
+        {
+          "IdentificacaoParlamentar": {
+            "CodigoParlamentar": "6335",
+            "NomeParlamentar": "Alan Rick",
+            "SiglaPartidoParlamentar": "UNIÃO",
+            "UfParlamentar": "AC"
+          }
+        },
+        {
+          "IdentificacaoParlamentar": {
+            "CodigoParlamentar": "5573",
+            "NomeParlamentar": "Abel Rebouças",
+            "SiglaPartidoParlamentar": "PDT"
+          }
+        }
+      ]
+    }
+  }
+}
