@@ -63,3 +63,14 @@ def test_mesmo_nome_gera_mesmo_id_nos_dois_formatos():
     ids_t = {p["id"] for p, _ in _pares("cldf_transacional.xlsx")}
     ids_p = {p["id"] for p, _ in _pares("cldf_pivo.xlsx")}
     assert ids_t == ids_p == {"cldf-chico-vigilante", "cldf-jane-klebia"}
+
+
+def test_pivo_normaliza_nome_maiusculo():
+    nomes = {p["nome"] for p, _ in _pares("cldf_pivo.xlsx")}
+    assert nomes == {"Chico Vigilante", "Jane Klebia"}
+
+
+def test_transacional_linha_sem_data_e_ignorada():
+    pares = _pares("cldf_transacional.xlsx")
+    assert len(pares) == 3  # a 4ª linha (sem DATA_COMPROVANTE) é descartada
+    assert all(d["fornecedor"] != "FORNECEDOR SEM DATA" for _, d in pares)

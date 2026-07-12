@@ -22,6 +22,8 @@ ws.append(["Deputado Chico Vigilante", "111", "POSTO BETA", None,
 ws.append(["Deputada Jane Klebia", "222", "IMOBILIÁRIA GAMA",
            "02.222.222/0002-22", None, "12", datetime(2016, 4, 1), 3000.0,
            "Locação de imóvel", None])
+ws.append(["Deputado Chico Vigilante", "111", "FORNECEDOR SEM DATA", None, None,
+           "13", None, 999.0, None, None])
 wb.save(PASTA / "cldf_transacional.xlsx")
 
 wb = openpyxl.Workbook()

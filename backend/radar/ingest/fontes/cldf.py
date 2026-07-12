@@ -40,19 +40,24 @@ def baixar(ano: int, pasta: Path) -> Path:
 def parse(caminho: Path) -> Iterator[tuple[dict, dict]]:
     # read_only=False de propósito: exports do Power BI trazem dimensões erradas
     wb = openpyxl.load_workbook(caminho)
-    linhas = wb.active.iter_rows(values_only=True)
-    primeira = next(linhas, None)
-    if primeira is None:
-        return
-    if str(primeira[0] or "").strip() == "NOME_PARLAMENTAR":
-        yield from _parse_transacional(linhas)
-    else:
-        yield from _parse_pivo(linhas)
-    wb.close()
+    try:
+        linhas = wb.active.iter_rows(values_only=True)
+        primeira = next(linhas, None)
+        if primeira is None:
+            return
+        if str(primeira[0] or "").strip() == "NOME_PARLAMENTAR":
+            yield from _parse_transacional(linhas)
+        else:
+            yield from _parse_pivo(linhas)
+    finally:
+        wb.close()
 
 
 def _politico(nome_bruto: str) -> dict:
     nome = re.sub(r"^deputad[oa]\s+", "", str(nome_bruto).strip(), flags=re.IGNORECASE)
+    # normalizar nomes em CAIXA ALTA (formato pivô)
+    if nome.isupper():
+        nome = nome.title()
     return {
         "id": f"cldf-{slug(nome)}",
         "nome": nome,
@@ -67,6 +72,7 @@ def _politico(nome_bruto: str) -> dict:
 def _parse_transacional(linhas) -> Iterator[tuple[dict, dict]]:
     for linha in linhas:
         if not linha or not linha[0] or linha[6] is None:
+            # sem data não há competência (ano/mês) para a despesa
             continue
         politico = _politico(linha[0])
         data = linha[6].date()
