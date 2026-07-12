@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { obterRankings, type ItemRanking } from '../lib/api'
 import { formatarBRL } from '../lib/formato'
 
-const ANOS = Array.from({ length: 11 }, (_, i) => 2016 + i)
+const ANOS = Array.from({ length: 14 }, (_, i) => 2013 + i)
 
 export default function Rankings() {
   const [ano, setAno] = useState<number | undefined>(2026)

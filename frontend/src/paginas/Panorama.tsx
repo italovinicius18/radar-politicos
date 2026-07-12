@@ -5,7 +5,7 @@ import { obterVisaoGeral, type VisaoGeral } from '../lib/api'
 import { formatarBRL, formatarBRLCompacto, MESES_ABREV } from '../lib/formato'
 import { infoFonte } from '../lib/fontes'
 
-const ANOS = Array.from({ length: 11 }, (_, i) => 2016 + i)
+const ANOS = Array.from({ length: 14 }, (_, i) => 2013 + i)
 // Cores validadas (dataviz): verde de marca de gráfico
 const COR_MARCA = '#1d7a4d'
 

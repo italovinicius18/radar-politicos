@@ -39,7 +39,7 @@ _REGRAS_CATEGORIA = [
     ("LOCOMOCAO", "Locomoção, hospedagem e alimentação"),
     ("PASSAGE", "Passagens"),
     ("COMBUST", "Combustíveis"),
-    ("DIVULGA", "Divulgação"),
+    ("DIVUL", "Divulgação"),
     ("CONSULTOR", "Consultorias e trabalhos técnicos"),
     ("ESCRITORIO", "Manutenção de escritório"),
     ("MATERIAL DE CONSUMO", "Manutenção de escritório"),
