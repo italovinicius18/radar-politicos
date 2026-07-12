@@ -24,6 +24,16 @@ ws.append(["Deputada Jane Klebia", "222", "IMOBILIÁRIA GAMA",
            "Locação de imóvel", None])
 ws.append(["Deputado Chico Vigilante", "111", "FORNECEDOR SEM DATA", None, None,
            "13", None, 999.0, None, None])
+# 3 novas linhas com formatos reais
+ws.append(["Deputada Jane Klebia", "222", "HOTEL XYZ",
+           "03.333.333/0003-33", None, "14", datetime(2016, 5, 10), "R$ 5.000,00",
+           "Hospedagem", None])
+ws.append(["Deputado Chico Vigilante", "111", "TRANSPORTADORA ABC",
+           "04.444.444/0004-44", None, "15", datetime(2016, 6, 15), "9,900,00",
+           "Locação de veículos", None])
+ws.append(["Deputada Jane Klebia", "222", "RESTAURANTE DEF", None,
+           "555.666.777-88", "16", "15/05/2016", 700,
+           "Alimentação", None])
 wb.save(PASTA / "cldf_transacional.xlsx")
 
 wb = openpyxl.Workbook()
@@ -34,4 +44,17 @@ ws.append(["ano", "mês", "deputado", "Imóvel", "Veículos", "Glosa", "totalVer
 ws.append([2025, "abr", "CHICO VIGILANTE", 1000, 500, 0, 1800])
 ws.append([2025, "mai", "JANE KLEBIA", 2000, None, 100, 1900])
 wb.save(PASTA / "cldf_pivo.xlsx")
+
+# 2013: ordem diferente (DATA_COMPROVANTE antes de NR_COMPROVANTE)
+wb = openpyxl.Workbook()
+ws = wb.active
+ws.append([
+    "NOME_PARLAMENTAR", "CPF_PARLAMENTAR", "NOME_PRESTADOR", "CNPJ_PRESTADOR",
+    "CPF_PRESTADOR", "DATA_COMPROVANTE", "NR_COMPROVANTE", "VALOR_DESPESA",
+    "CLASSIFICACAO", "OBSERVACOES",
+])
+ws.append(["Deputado Chico Vigilante", "111", "PAPELARIA ALFA LTDA",
+           "01.111.111/0001-11", None, datetime(2013, 3, 5), "10", 250.0,
+           "MATERIAL DE ESCRITÓRIO", None])
+wb.save(PASTA / "cldf_transacional_2013.xlsx")
 print("fixtures geradas")

@@ -1,11 +1,12 @@
 import re
 from collections.abc import Iterator
+from datetime import date
 from pathlib import Path
 
 import httpx
 import openpyxl
 
-from radar.ingest.normalizacao import normalizar_categoria, slug
+from radar.ingest.normalizacao import normalizar_categoria, parse_data, slug
 
 FONTE = "cldf"
 CARGO = "Deputado Distrital"
@@ -45,8 +46,9 @@ def parse(caminho: Path) -> Iterator[tuple[dict, dict]]:
         primeira = next(linhas, None)
         if primeira is None:
             return
-        if str(primeira[0] or "").strip() == "NOME_PARLAMENTAR":
-            yield from _parse_transacional(linhas)
+        cabecalho_normalizado = [str(c or "").strip() for c in primeira]
+        if "NOME_PARLAMENTAR" in cabecalho_normalizado:
+            yield from _parse_transacional(cabecalho_normalizado, linhas)
         else:
             yield from _parse_pivo(linhas)
     finally:
@@ -69,14 +71,54 @@ def _politico(nome_bruto: str) -> dict:
     }
 
 
-def _parse_transacional(linhas) -> Iterator[tuple[dict, dict]]:
+def _data(bruto) -> date | None:
+    """DATA_COMPROVANTE real vem como datetime, date ou string (ISO/DD/MM/YYYY)."""
+    if bruto is None:
+        return None
+    if hasattr(bruto, "date"):
+        return bruto.date()
+    if hasattr(bruto, "year"):
+        return bruto
+    return parse_data(str(bruto))
+
+
+def _valor(bruto) -> float | None:
+    """VALOR_DESPESA real: número, ou string BR ('198,84', '9,900,00', 'R$ 5.000,00').
+    Nesses arquivos ponto é sempre milhar; vírgulas além da última também são milhar."""
+    if bruto is None:
+        return None
+    if isinstance(bruto, (int, float)):
+        return float(bruto)
+    texto = str(bruto).replace("R$", "").replace("\xa0", "").strip().replace(".", "")
+    if not texto:
+        return None
+    partes = texto.split(",")
+    if len(partes) > 1:
+        texto = "".join(partes[:-1]) + "." + partes[-1]
+    try:
+        return float(texto)
+    except ValueError:
+        return None
+
+
+def _parse_transacional(cabecalho, linhas) -> Iterator[tuple[dict, dict]]:
+    idx = {nome: i for i, nome in enumerate(cabecalho)}
+
+    def campo(linha, nome):
+        i = idx.get(nome)
+        return linha[i] if i is not None and i < len(linha) else None
+
     for linha in linhas:
-        if not linha or not linha[0] or linha[6] is None:
-            # sem data não há competência (ano/mês) para a despesa
+        if not linha or not campo(linha, "NOME_PARLAMENTAR"):
             continue
-        politico = _politico(linha[0])
-        data = linha[6].date()
-        classificacao = str(linha[8]).strip() if linha[8] else ""
+        data = _data(campo(linha, "DATA_COMPROVANTE"))
+        valor = _valor(campo(linha, "VALOR_DESPESA"))
+        if data is None or valor is None:
+            continue  # sem data não há competência; sem valor não há despesa
+        politico = _politico(campo(linha, "NOME_PARLAMENTAR"))
+        classificacao = str(campo(linha, "CLASSIFICACAO") or "").strip()
+        obs = campo(linha, "OBSERVACOES")
+        prestador = campo(linha, "NOME_PRESTADOR")
         despesa = {
             "politico_id": politico["id"],
             "ano": data.year,
@@ -84,10 +126,10 @@ def _parse_transacional(linhas) -> Iterator[tuple[dict, dict]]:
             "data": data,
             "categoria": normalizar_categoria(classificacao),
             "categoria_original": classificacao,
-            "descricao": str(linha[9]).strip() if linha[9] else None,
-            "fornecedor": str(linha[2]).strip() if linha[2] else None,
-            "fornecedor_cnpj": str(linha[3] or linha[4] or "").strip() or None,
-            "valor": float(linha[7] or 0),
+            "descricao": str(obs).strip() if obs else None,
+            "fornecedor": str(prestador).strip() if prestador else None,
+            "fornecedor_cnpj": str(campo(linha, "CNPJ_PRESTADOR") or campo(linha, "CPF_PRESTADOR") or "").strip() or None,
+            "valor": valor,
             "documento_url": None,
             "fonte": FONTE,
         }

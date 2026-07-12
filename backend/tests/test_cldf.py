@@ -11,7 +11,7 @@ def _pares(nome):
 
 def test_transacional_gera_pares_e_politico():
     pares = _pares("cldf_transacional.xlsx")
-    assert len(pares) == 3
+    assert len(pares) == 6
     politico, despesa = pares[0]
     assert politico == {
         "id": "cldf-chico-vigilante",
@@ -72,5 +72,20 @@ def test_pivo_normaliza_nome_maiusculo():
 
 def test_transacional_linha_sem_data_e_ignorada():
     pares = _pares("cldf_transacional.xlsx")
-    assert len(pares) == 3  # a 4ª linha (sem DATA_COMPROVANTE) é descartada
+    assert len(pares) == 6  # a 4ª linha (sem DATA_COMPROVANTE) é descartada, 3 linhas novas válidas são adicionadas
     assert all(d["fornecedor"] != "FORNECEDOR SEM DATA" for _, d in pares)
+
+
+def test_transacional_valores_e_datas_string():
+    pares = _pares("cldf_transacional.xlsx")
+    valores = {d["valor"] for _, d in pares}
+    assert 5000.0 in valores      # "R$ 5.000,00"
+    assert 9900.0 in valores      # "9,900,00"
+    assert 700.0 in valores       # data string "15/05/2016"
+
+
+def test_transacional_ordem_de_colunas_2013():
+    pares = _pares("cldf_transacional_2013.xlsx")
+    assert len(pares) == 1
+    _, d = pares[0]
+    assert d["data"] is not None and d["valor"] > 0
