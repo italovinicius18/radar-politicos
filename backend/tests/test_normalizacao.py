@@ -74,3 +74,5 @@ def test_normalizar_categoria_cldf():
     assert normalizar_categoria("Maquina Equipamento") == "Manutenção de escritório"
     assert normalizar_categoria("Aquisição Materias") == "Manutenção de escritório"
     assert normalizar_categoria("Glosa") == "Glosas e estornos"
+    assert normalizar_categoria("Locação e manutenção de imóveis") == "Manutenção de escritório"
+    assert normalizar_categoria("Locação De Veículo") == "Locação de veículos"
