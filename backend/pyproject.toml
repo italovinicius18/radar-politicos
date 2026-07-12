@@ -6,6 +6,7 @@ dependencies = [
     "duckdb>=1.5.4",
     "fastapi[standard]>=0.139.0",
     "httpx>=0.28.1",
+    "openpyxl>=3.1.5",
 ]
 
 [dependency-groups]

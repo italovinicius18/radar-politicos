@@ -4,9 +4,9 @@ from pathlib import Path
 
 from radar.db import conectar, criar_schema
 from radar.ingest import loader
-from radar.ingest.fontes import camara, senado
+from radar.ingest.fontes import camara, cldf, senado
 
-FONTES = {"camara": camara, "senado": senado}
+FONTES = {"camara": camara, "senado": senado, "cldf": cldf}
 
 
 def parse_anos(texto: str) -> list[int]:

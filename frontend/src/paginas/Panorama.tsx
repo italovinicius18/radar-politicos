@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom'
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { obterVisaoGeral, type VisaoGeral } from '../lib/api'
 import { formatarBRL, formatarBRLCompacto, MESES_ABREV } from '../lib/formato'
+import { infoFonte } from '../lib/fontes'
 
-const ANOS = Array.from({ length: 11 }, (_, i) => 2016 + i)
-// Cores validadas (dataviz): verde de marca de gráfico e azul do Senado
+const ANOS = Array.from({ length: 14 }, (_, i) => 2013 + i)
+// Cores validadas (dataviz): verde de marca de gráfico
 const COR_MARCA = '#1d7a4d'
-const COR_SENADO = '#0369a1'
 
 export default function Panorama() {
   const [dados, setDados] = useState<VisaoGeral | null>(null)
@@ -27,7 +27,7 @@ export default function Panorama() {
 
   const { kpis } = dados
   const nota = kpis.nota_mais_cara
-  const totalCS = dados.camara_senado.reduce((s, x) => s + x.total, 0)
+  const totalCasas = dados.por_casa.reduce((s, x) => s + x.total, 0)
   const serieMensal = dados.por_mes.map((m) => ({ nome: MESES_ABREV[m.mes - 1], total: m.total }))
   const maxCategoria = dados.top_categorias[0]?.total ?? 0
 
@@ -54,7 +54,7 @@ export default function Panorama() {
         <div className="cartao tile">
           <small>Parlamentares com gastos</small>
           <div className="tile-valor">{kpis.parlamentares}</div>
-          <small>{kpis.deputados} deputados · {kpis.senadores} senadores</small>
+          <small>{kpis.por_cargo.map((c) => `${c.cargo}: ${c.quantidade}`).join(' · ')}</small>
         </div>
         <div className="cartao tile">
           <small>Média por parlamentar</small>
@@ -86,24 +86,24 @@ export default function Panorama() {
           </ResponsiveContainer>
         </div>
         <div className="cartao">
-          <h3>Câmara × Senado</h3>
+          <h3>Por casa</h3>
           <div className="split-bar">
-            {dados.camara_senado.map((x) => (
+            {dados.por_casa.map((x) => (
               <div
                 key={x.fonte}
                 className="split-parte"
                 style={{
-                  width: totalCS ? `${(x.total / totalCS) * 100}%` : '50%',
-                  background: x.fonte === 'camara' ? COR_MARCA : COR_SENADO,
+                  width: totalCasas ? `${(x.total / totalCasas) * 100}%` : `${100 / dados.por_casa.length}%`,
+                  background: infoFonte(x.fonte).cor,
                 }}
               />
             ))}
           </div>
-          {dados.camara_senado.map((x) => (
+          {dados.por_casa.map((x) => (
             <div key={x.fonte} className="split-legenda">
-              <span className="pino" style={{ background: x.fonte === 'camara' ? COR_MARCA : COR_SENADO }} />
-              {x.fonte === 'camara' ? 'Câmara' : 'Senado'}: {formatarBRLCompacto(x.total)}
-              {' '}({x.parlamentares} parlamentares{totalCS ? `, ${((x.total / totalCS) * 100).toFixed(0)}%` : ''})
+              <span className="pino" style={{ background: infoFonte(x.fonte).cor }} />
+              {x.rotulo}: {formatarBRLCompacto(x.total)}
+              {' '}({x.parlamentares} parlamentares{totalCasas ? `, ${((x.total / totalCasas) * 100).toFixed(0)}%` : ''})
             </div>
           ))}
         </div>

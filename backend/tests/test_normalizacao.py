@@ -66,3 +66,14 @@ def test_normalizar_categoria_vazia():
 def test_slug_e_sem_acento():
     assert slug("João da Silva") == "joao-da-silva"
     assert sem_acento("José ÁVILA") == "jose avila"
+
+
+def test_normalizar_categoria_cldf():
+    assert normalizar_categoria("Imóvel") == "Manutenção de escritório"
+    assert normalizar_categoria("Locação de imóvel") == "Manutenção de escritório"
+    assert normalizar_categoria("Maquina Equipamento") == "Manutenção de escritório"
+    assert normalizar_categoria("Aquisição Materias") == "Manutenção de escritório"
+    assert normalizar_categoria("Glosa") == "Glosas e estornos"
+    assert normalizar_categoria("Locação e manutenção de imóveis") == "Manutenção de escritório"
+    assert normalizar_categoria("Locação De Veículo") == "Locação de veículos"
+    assert normalizar_categoria("Divulção Parlamentar") == "Divulgação"

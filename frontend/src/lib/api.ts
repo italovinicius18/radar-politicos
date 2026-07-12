@@ -58,14 +58,13 @@ export interface VisaoGeral {
     variacao_pct: number | null
     meses_com_dados: number
     parlamentares: number
-    deputados: number
-    senadores: number
+    por_cargo: { cargo: string; quantidade: number }[]
     media_por_parlamentar: number
     num_despesas: number
     nota_mais_cara: NotaMaisCara | null
   }
   por_mes: { mes: number; total: number }[]
-  camara_senado: { fonte: string; total: number; parlamentares: number }[]
+  por_casa: { fonte: string; rotulo: string; total: number; parlamentares: number }[]
   top_gastadores: ItemRanking[]
   top_categorias: { categoria: string; total: number }[]
   top_fornecedores: { fornecedor: string; cnpj: string; total: number; quantidade: number }[]

@@ -2,6 +2,8 @@ import duckdb
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
+from radar.fontes_registro import rotulo
+
 COLUNAS_POLITICO = ("id", "nome", "cargo", "partido", "uf", "foto_url", "fonte")
 
 
@@ -201,9 +203,11 @@ def criar_app(db_path: str) -> FastAPI:
                     (ano,),
                 ).fetchall()
             )
-            deputados = cargos.get("Deputado Federal", 0)
-            senadores = cargos.get("Senador", 0)
-            parlamentares = deputados + senadores
+            por_cargo = [
+                {"cargo": cargo, "quantidade": qtd}
+                for cargo, qtd in sorted(cargos.items())
+            ]
+            parlamentares = sum(cargos.values())
             nota = c.execute(
                 f"""SELECT d.valor, d.categoria, d.fornecedor, d.data,
                            {', '.join('p.' + col for col in COLUNAS_POLITICO)}
@@ -252,8 +256,7 @@ def criar_app(db_path: str) -> FastAPI:
                 "variacao_pct": ((total - anterior) / anterior * 100) if anterior else None,
                 "meses_com_dados": meses,
                 "parlamentares": parlamentares,
-                "deputados": deputados,
-                "senadores": senadores,
+                "por_cargo": por_cargo,
                 "media_por_parlamentar": total / parlamentares if parlamentares else 0.0,
                 "num_despesas": num_despesas,
                 "nota_mais_cara": {
@@ -267,8 +270,8 @@ def criar_app(db_path: str) -> FastAPI:
                 else None,
             },
             "por_mes": [{"mes": m, "total": float(t)} for m, t in por_mes],
-            "camara_senado": [
-                {"fonte": f, "total": float(t), "parlamentares": q}
+            "por_casa": [
+                {"fonte": f, "rotulo": rotulo(f), "total": float(t), "parlamentares": q}
                 for f, t, q in camara_senado
             ],
             "top_gastadores": [
