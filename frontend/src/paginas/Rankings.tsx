@@ -31,6 +31,7 @@ export default function Rankings() {
           <option value="">Todos os cargos</option>
           <option value="Deputado Federal">Deputados Federais</option>
           <option value="Senador">Senadores</option>
+          <option value="Deputado Distrital">Deputados Distritais</option>
         </select>
       </div>
       {erro && <p className="cartao">⚠️ {erro}</p>}
