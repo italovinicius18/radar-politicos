@@ -90,7 +90,9 @@ def test_visao_geral_2024(cliente):
     assert k["total"] == 8300.00
     assert k["num_despesas"] == 4
     assert k["meses_com_dados"] == 3
-    assert k["deputados"] == 2 and k["senadores"] == 1 and k["parlamentares"] == 3
+    assert k["parlamentares"] == 3
+    assert {"cargo": "Deputado Federal", "quantidade": 2} in k["por_cargo"]
+    assert {"cargo": "Senador", "quantidade": 1} in k["por_cargo"]
     assert round(k["media_por_parlamentar"], 2) == round(8300 / 3, 2)
     assert k["nota_mais_cara"]["valor"] == 5000.00
     assert k["nota_mais_cara"]["politico"]["id"] == "camara-2"
@@ -99,7 +101,7 @@ def test_visao_geral_2024(cliente):
         {"mes": 2, "total": 300.00},
         {"mes": 3, "total": 5000.00},
     ]
-    assert {"fonte": "camara", "total": 6300.00, "parlamentares": 2} in corpo["camara_senado"]
+    assert {"fonte": "camara", "rotulo": "Câmara", "total": 6300.00, "parlamentares": 2} in corpo["por_casa"]
     assert corpo["top_gastadores"][0]["politico"]["id"] == "camara-2"
     assert corpo["top_categorias"][0] == {"categoria": "Divulgação", "total": 5000.00}
     assert corpo["top_fornecedores"][0]["fornecedor"] == "GRÁFICA Y"
