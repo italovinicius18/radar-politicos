@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import type { Meta, Politico, Resumo, VisaoGeral } from './tipos'
+import type { ItemRanking, Meta, Politico, Resumo, VisaoGeral } from './tipos'
 
 const RAIZ = join(process.cwd(), 'public', 'dados')
 
@@ -12,3 +12,4 @@ export const lerMeta = () => ler<Meta>('meta.json')
 export const lerPoliticos = () => ler<Politico[]>('politicos.json')
 export const lerPerfil = (id: string) => ler<Resumo>(`perfil/${id}.json`)
 export const lerVisaoGeral = (ano: number) => ler<VisaoGeral>(`visao-geral/${ano}.json`)
+export const lerRankings = (ano: number) => ler<ItemRanking[]>(`rankings/${ano}.json`)
