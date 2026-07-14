@@ -395,23 +395,23 @@ def anos_do_politico(con, politico_id: str) -> list[int]:
 
 
 COLUNAS_COMPACTAS = [
-    "data", "categoria", "categoria_original", "descricao",
+    "ano", "data", "categoria", "categoria_original", "descricao",
     "fornecedor", "cnpj", "valor", "doc",
 ]
 
 
-def despesas_compactas(con, politico_id: str, ano: int) -> dict:
+def despesas_compactas(con, politico_id: str) -> dict:
     linhas = con.execute(
-        """SELECT data, categoria, categoria_original, descricao,
+        """SELECT ano, data, categoria, categoria_original, descricao,
                   fornecedor, fornecedor_cnpj, valor, documento_url
-           FROM despesas WHERE politico_id = ? AND ano = ?
-           ORDER BY data DESC NULLS LAST""",
-        (politico_id, ano),
+           FROM despesas WHERE politico_id = ?
+           ORDER BY ano DESC, data DESC NULLS LAST""",
+        (politico_id,),
     ).fetchall()
     return {
         "colunas": COLUNAS_COMPACTAS,
         "linhas": [
-            [d.isoformat() if d else None, cat, cat_o, desc, forn, cnpj, float(v), doc]
-            for d, cat, cat_o, desc, forn, cnpj, v, doc in linhas
+            [ano, d.isoformat() if d else None, cat, cat_o, desc, forn, cnpj, float(v), doc]
+            for ano, d, cat, cat_o, desc, forn, cnpj, v, doc in linhas
         ],
     }

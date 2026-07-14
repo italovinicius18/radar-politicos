@@ -20,9 +20,11 @@ def test_estrutura_gerada(db_amostra, tmp_path):
     assert (saida / "visao-geral" / "2025.json").exists()
     assert (saida / "rankings" / "2024.json").exists()
     assert (saida / "perfil" / "camara-1.json").exists()
-    assert (saida / "despesas" / "camara-1" / "2024.json").exists()
-    # senado-joao-neto só tem 2024: não deve existir chunk de 2025
-    assert not (saida / "despesas" / "senado-joao-neto" / "2025.json").exists()
+    assert (saida / "despesas" / "camara-1.json").exists()
+    # senado-joao-neto só tem despesas de 2024
+    assert (saida / "despesas" / "senado-joao-neto.json").exists()
+    despesas_joao = json.loads((saida / "despesas" / "senado-joao-neto.json").read_text())
+    assert all(l[0] == 2024 for l in despesas_joao["linhas"])
 
 
 def test_meta(db_amostra, tmp_path):
@@ -40,8 +42,8 @@ def test_paridade_com_consultas(db_amostra, tmp_path):
     con = conectar(db_amostra, somente_leitura=True)
     assert json.loads((saida / "perfil" / "camara-1.json").read_text()) == consultas.resumo(con, "camara-1")
     assert json.loads((saida / "visao-geral" / "2024.json").read_text()) == consultas.visao_geral(con, 2024)
-    assert json.loads((saida / "despesas" / "camara-1" / "2024.json").read_text()) == (
-        consultas.despesas_compactas(con, "camara-1", 2024)
+    assert json.loads((saida / "despesas" / "camara-1.json").read_text()) == (
+        consultas.despesas_compactas(con, "camara-1")
     )
     con.close()
 

@@ -40,8 +40,7 @@ def exportar(db: str, saida: Path) -> dict:
     for p in politicos:
         pid = p["id"]
         grava(f"perfil/{pid}.json", consultas.resumo(con, pid))
-        for ano in consultas.anos_do_politico(con, pid):
-            grava(f"despesas/{pid}/{ano}.json", consultas.despesas_compactas(con, pid, ano))
+        grava(f"despesas/{pid}.json", consultas.despesas_compactas(con, pid))
     grava("meta.json", {
         "gerado_em": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "anos": anos,

@@ -44,12 +44,17 @@ def test_anos_do_politico(con):
 
 
 def test_despesas_compactas(con):
-    d = consultas.despesas_compactas(con, "camara-1", 2024)
+    d = consultas.despesas_compactas(con, "camara-1")
     assert d["colunas"] == [
-        "data", "categoria", "categoria_original", "descricao",
+        "ano", "data", "categoria", "categoria_original", "descricao",
         "fornecedor", "cnpj", "valor", "doc",
     ]
-    assert len(d["linhas"]) == 2
-    # ordenado por data desc: fev antes de jan
-    assert d["linhas"][0][0] == "2024-02-05" and d["linhas"][0][6] == 300.0
-    assert d["linhas"][1][4] == "TAM" and d["linhas"][1][7] == "http://doc/1.pdf"
+    # camara-1 tem 3 despesas no total (2x2024 + 1x2025)
+    assert len(d["linhas"]) == 3
+    # ordenado por ano desc: 2025 primeiro
+    assert d["linhas"][0][0] == 2025
+    # dentro de 2024: fev antes de jan
+    assert d["linhas"][1][0] == 2024 and d["linhas"][1][1] == "2024-02-05"
+    assert d["linhas"][1][7] == 300.0
+    assert d["linhas"][2][0] == 2024 and d["linhas"][2][1] == "2024-01-10"
+    assert d["linhas"][2][5] == "TAM" and d["linhas"][2][8] == "http://doc/1.pdf"
