@@ -220,11 +220,6 @@ def criar_app(db_path: str) -> FastAPI:
                 "GROUP BY mes ORDER BY mes",
                 (ano,),
             ).fetchall()
-            camara_senado = c.execute(
-                "SELECT fonte, sum(valor), count(DISTINCT politico_id) "
-                "FROM despesas WHERE ano = ? GROUP BY fonte ORDER BY fonte",
-                (ano,),
-            ).fetchall()
             gastadores = c.execute(
                 f"""SELECT {', '.join('p.' + col for col in COLUNAS_POLITICO)},
                            sum(d.valor) AS total
@@ -244,6 +239,101 @@ def criar_app(db_path: str) -> FastAPI:
                           sum(valor) AS t, count(*) AS q
                    FROM despesas WHERE ano = ? AND fornecedor IS NOT NULL
                    GROUP BY fornecedor, cnpj ORDER BY t DESC LIMIT 5""",
+                (ano,),
+            ).fetchall()
+
+            SQL_TOTAIS = """
+                SELECT p.id, p.partido, p.uf, p.fonte, sum(d.valor) AS total
+                FROM despesas d JOIN politicos p ON p.id = d.politico_id
+                WHERE d.ano = ? GROUP BY p.id, p.partido, p.uf, p.fonte
+            """
+            por_partido = c.execute(
+                f"""WITH totais AS ({SQL_TOTAIS})
+                    SELECT coalesce(partido, 'Sem partido informado') AS pt,
+                           count(*), avg(total), median(total)
+                    FROM totais GROUP BY pt ORDER BY 3 DESC""",
+                (ano,),
+            ).fetchall()
+            media_por_uf = c.execute(
+                f"""WITH totais AS ({SQL_TOTAIS})
+                    SELECT coalesce(uf, 'Não informado') AS u, count(*), avg(total)
+                    FROM totais GROUP BY u ORDER BY 3 DESC""",
+                (ano,),
+            ).fetchall()
+            por_casa_linhas = c.execute(
+                f"""WITH totais AS ({SQL_TOTAIS})
+                    SELECT fonte, sum(total), count(*), avg(total), median(total)
+                    FROM totais GROUP BY fonte ORDER BY fonte""",
+                (ano,),
+            ).fetchall()
+
+            ano_ref = c.execute(
+                "SELECT max(ano) FROM despesas WHERE mes = 12 AND ano <= ?", (ano,)
+            ).fetchone()[0]
+            fim_de_ano = None
+            if ano_ref is not None:
+                meses_ref = c.execute(
+                    "SELECT mes, sum(valor) FROM despesas WHERE ano = ? AND mes IS NOT NULL GROUP BY mes",
+                    (ano_ref,),
+                ).fetchall()
+                dezembro = next((float(t) for m, t in meses_ref if m == 12), 0.0)
+                media_mensal = sum(float(t) for _, t in meses_ref) / len(meses_ref)
+                if media_mensal:
+                    fim_de_ano = {
+                        "ano_ref": ano_ref,
+                        "dezembro": dezembro,
+                        "media_mensal": media_mensal,
+                        "variacao_pct": (dezembro - media_mensal) / media_mensal * 100,
+                    }
+
+            linhas_doc = c.execute(
+                "SELECT fonte, count(*), count(documento_url) FROM despesas "
+                "WHERE ano = ? GROUP BY fonte ORDER BY fonte",
+                (ano,),
+            ).fetchall()
+            transparencia = None
+            if linhas_doc:
+                total_n = sum(n for _, n, _ in linhas_doc)
+                total_com = sum(cd for _, _, cd in linhas_doc)
+                transparencia = {
+                    "pct_com_documento": total_com * 100.0 / total_n,
+                    "por_fonte": [
+                        {"fonte": f, "rotulo": rotulo(f), "pct": cd * 100.0 / n}
+                        for f, n, cd in linhas_doc
+                    ],
+                }
+
+            top10, total_ano = c.execute(
+                """WITH forn AS (
+                       SELECT sum(valor) AS t FROM despesas
+                       WHERE ano = ? AND fornecedor IS NOT NULL
+                       GROUP BY fornecedor, coalesce(fornecedor_cnpj, '')
+                       ORDER BY t DESC LIMIT 10)
+                   SELECT (SELECT sum(t) FROM forn),
+                          (SELECT sum(valor) FROM despesas WHERE ano = ?)""",
+                (ano, ano),
+            ).fetchone()
+            concentracao_pct = (
+                float(top10) * 100.0 / float(total_ano)
+                if top10 is not None and total_ano is not None and float(total_ano) > 0
+                else None
+            )
+
+            exclusivos = c.execute(
+                """WITH por_parl AS (
+                       SELECT fornecedor, coalesce(fornecedor_cnpj, '') AS cnpj,
+                              politico_id, sum(valor) AS v
+                       FROM despesas WHERE ano = ? AND fornecedor IS NOT NULL
+                       GROUP BY 1, 2, 3),
+                   agg AS (
+                       SELECT fornecedor, cnpj, sum(v) AS total, max(v) AS maior_v,
+                              arg_max(politico_id, v) AS pid
+                       FROM por_parl GROUP BY 1, 2)
+                   SELECT a.fornecedor, a.cnpj, a.total,
+                          a.maior_v * 100.0 / a.total, p.id, p.nome
+                   FROM agg a JOIN politicos p ON p.id = a.pid
+                   WHERE a.total >= 50000 AND a.maior_v >= a.total * 0.9
+                   ORDER BY a.total DESC""",
                 (ano,),
             ).fetchall()
         total = float(total)
@@ -271,9 +361,35 @@ def criar_app(db_path: str) -> FastAPI:
             },
             "por_mes": [{"mes": m, "total": float(t)} for m, t in por_mes],
             "por_casa": [
-                {"fonte": f, "rotulo": rotulo(f), "total": float(t), "parlamentares": q}
-                for f, t, q in camara_senado
+                {"fonte": f, "rotulo": rotulo(f), "total": float(t), "parlamentares": q,
+                 "media": float(m), "mediana": float(md)}
+                for f, t, q, m, md in por_casa_linhas
             ],
+            "por_partido": [
+                {"partido": pt, "parlamentares": q, "media": float(m), "mediana": float(md)}
+                for pt, q, m, md in por_partido
+            ],
+            "media_por_uf": [
+                {"uf": u, "parlamentares": q, "media": float(m)}
+                for u, q, m in media_por_uf
+            ],
+            "estatisticas": {
+                "fim_de_ano": fim_de_ano,
+                "transparencia": transparencia,
+                "concentracao_top10_pct": concentracao_pct,
+                "quase_exclusivos": {
+                    "quantidade": len(exclusivos),
+                    "maior": {
+                        "fornecedor": exclusivos[0][0],
+                        "cnpj": exclusivos[0][1],
+                        "total": float(exclusivos[0][2]),
+                        "pct_um_parlamentar": float(exclusivos[0][3]),
+                        "politico": {"id": exclusivos[0][4], "nome": exclusivos[0][5]},
+                    }
+                    if exclusivos
+                    else None,
+                },
+            },
             "top_gastadores": [
                 {"politico": _politico_dict(l[:-1]), "total": float(l[-1])}
                 for l in gastadores
