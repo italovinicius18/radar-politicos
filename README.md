@@ -76,10 +76,15 @@ Para desenvolvimento com hot-reload: `npm run dev` (usa os mesmos `public/dados`
 
 `frontend/out/` funciona em qualquer hosting estático:
 
-- **Cloudflare Pages**: `npx wrangler pages deploy frontend/out` (limite de 20 mil arquivos; o site usa ~17 mil — se apertar, desligue o segment-prefetch do Next ou troque de hosting)
+- **Cloudflare Pages** (domínio padrão `radar-politicos.pages.dev`):
+  ```bash
+  npx wrangler login                                        # uma vez
+  npx wrangler pages deploy frontend/out --project-name radar-politicos
+  ```
+  Limite de 20 mil arquivos por deploy; o site usa ~17 mil. O primeiro upload (~660 MB) demora; os seguintes enviam só o que mudou.
 - **GitHub Pages / Netlify**: publique o diretório (atenção: os caminhos de dados são absolutos — o site precisa estar na raiz do domínio)
 
-Antes de publicar com domínio próprio, ajuste a URL em `frontend/src/app/sitemap.ts`, `robots.ts` e `layout.tsx` (`metadataBase`).
+A URL pública fica em um único lugar: `frontend/src/lib/site.ts` (usada em `metadataBase`, sitemap e robots). Ao trocar de domínio, ajuste lá e rebuilde.
 
 ## Qualidade e validação
 

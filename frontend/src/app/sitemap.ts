@@ -1,8 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { lerPoliticos } from '@/lib/dados-build'
+import { URL_BASE as BASE } from '@/lib/site'
 
 export const dynamic = 'force-static'
-const BASE = 'https://radarpoliticos.com.br' // ajustar quando o domínio existir
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

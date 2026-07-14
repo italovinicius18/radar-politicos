@@ -6,9 +6,10 @@ import '@fontsource/ibm-plex-mono/600.css'
 import './globals.css'
 import { lerMeta } from '@/lib/dados-build'
 import { formatarData } from '@/lib/formato'
+import { URL_BASE } from '@/lib/site'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://radarpoliticos.com.br'),
+  metadataBase: new URL(URL_BASE),
   title: 'Radar Políticos — gastos parlamentares abertos',
   description:
     'Gastos de deputados federais, senadores e deputados distritais (2013–2026), direto das bases abertas oficiais: o quê, com quem, quanto e a nota fiscal.',
