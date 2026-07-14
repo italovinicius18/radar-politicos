@@ -1,26 +1,28 @@
+'use client'
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { obterVisaoGeral, type VisaoGeral } from '../lib/api'
-import { formatarBRL, formatarBRLCompacto, MESES_ABREV } from '../lib/formato'
-import { infoFonte } from '../lib/fontes'
+import type { VisaoGeral } from '@/lib/tipos'
+import { formatarBRL, formatarBRLCompacto, MESES_ABREV } from '@/lib/formato'
+import { infoFonte } from '@/lib/fontes'
 
-const ANOS = Array.from({ length: 14 }, (_, i) => 2013 + i)
 // Cores validadas (dataviz): verde de marca de gráfico
 const COR_MARCA = '#199e70' // marca dark validada (dataviz, superfície #11221a)
 
-export default function Panorama() {
-  const [dados, setDados] = useState<VisaoGeral | null>(null)
+export function Panorama({ inicial, anos }: { inicial: VisaoGeral; anos: number[] }) {
+  const [dados, setDados] = useState<VisaoGeral>(inicial)
   const [ano, setAno] = useState<number | undefined>()
   const [erro, setErro] = useState('')
 
   useEffect(() => {
+    if (ano === undefined) { setDados(inicial); return }
     let ativo = true
-    obterVisaoGeral(ano)
+    fetch(`/dados/visao-geral/${ano}.json`)
+      .then((r) => { if (!r.ok) throw new Error(`Erro ${r.status} ao carregar o panorama`); return r.json() })
       .then((d) => { if (ativo) { setDados(d); setErro('') } })
       .catch((e) => { if (ativo) setErro(e.message) })
     return () => { ativo = false }
-  }, [ano])
+  }, [ano, inicial])
 
   if (erro) return <p className="cartao">⚠️ Panorama indisponível: {erro}</p>
   if (!dados) return <p>Carregando panorama...</p>
@@ -38,7 +40,7 @@ export default function Panorama() {
       <div className="panorama-titulo">
         <h2>Panorama</h2>
         <select value={dados.ano} onChange={(e) => setAno(Number(e.target.value))}>
-          {ANOS.map((a) => <option key={a} value={a}>{a}</option>)}
+          {anos.map((a) => <option key={a} value={a}>{a}</option>)}
         </select>
       </div>
 
@@ -68,7 +70,7 @@ export default function Panorama() {
           <div className="tile-valor">{nota ? formatarBRLCompacto(nota.valor) : '—'}</div>
           {nota && (
             <small>
-              <Link to={`/politico/${nota.politico.id}`}>{nota.politico.nome}</Link> · {nota.categoria}
+              <Link href={`/politico/${nota.politico.id}`}>{nota.politico.nome}</Link> · {nota.categoria}
             </small>
           )}
         </div>
@@ -119,7 +121,7 @@ export default function Panorama() {
               <>
                 {' — maior: '}{e.quase_exclusivos.maior.fornecedor} ({formatarBRLCompacto(e.quase_exclusivos.maior.total)},{' '}
                 {e.quase_exclusivos.maior.pct_um_parlamentar.toFixed(0)}% de{' '}
-                <Link to={`/politico/${e.quase_exclusivos.maior.politico.id}`}>{e.quase_exclusivos.maior.politico.nome}</Link>)
+                <Link href={`/politico/${e.quase_exclusivos.maior.politico.id}`}>{e.quase_exclusivos.maior.politico.nome}</Link>)
               </>
             )}
           </small>
@@ -167,7 +169,7 @@ export default function Panorama() {
         <div className="cartao">
           <h3>Top 5 gastadores</h3>
           {dados.top_gastadores.map((g, i) => (
-            <Link key={g.politico.id} to={`/politico/${g.politico.id}`}>
+            <Link key={g.politico.id} href={`/politico/${g.politico.id}`}>
               <div className="top-linha">
                 <span className="top-posicao">{i + 1}º</span>
                 {g.politico.foto_url && <img src={g.politico.foto_url} alt="" />}

@@ -87,29 +87,20 @@ export interface VisaoGeral {
   }
 }
 
-async function obter<T>(caminho: string, parametros: Record<string, string | number | undefined>): Promise<T> {
-  const query = new URLSearchParams()
-  for (const [chave, valor] of Object.entries(parametros)) {
-    if (valor !== undefined && valor !== '') query.set(chave, String(valor))
-  }
-  const resposta = await fetch(`${caminho}?${query}`)
-  if (!resposta.ok) throw new Error(`Erro ${resposta.status} ao consultar a API`)
-  return resposta.json()
+export interface Meta {
+  gerado_em: string
+  anos: number[]
+  ano_max: number | null
+  total_politicos: number
+  total_despesas: number
 }
 
-export const buscarPoliticos = (busca: string) =>
-  obter<Politico[]>('/api/politicos', { busca })
+export interface RankingsAno {
+  geral: ItemRanking[]
+  por_cargo: Record<string, ItemRanking[]>
+}
 
-export const obterResumo = (id: string, anoInicio?: number, anoFim?: number) =>
-  obter<Resumo>(`/api/politicos/${encodeURIComponent(id)}/resumo`, { ano_inicio: anoInicio, ano_fim: anoFim })
-
-export const obterDespesas = (
-  id: string,
-  filtros: { ano?: number; categoria?: string; ordenar?: string; pagina?: number },
-) => obter<PaginaDespesas>(`/api/politicos/${encodeURIComponent(id)}/despesas`, filtros)
-
-export const obterRankings = (filtros: { ano?: number; cargo?: string; categoria?: string }) =>
-  obter<ItemRanking[]>('/api/rankings', filtros)
-
-export const obterVisaoGeral = (ano?: number) =>
-  obter<VisaoGeral>('/api/visao-geral', { ano })
+export interface DespesasCompactas {
+  colunas: string[]
+  linhas: (string | number | null)[][]
+}

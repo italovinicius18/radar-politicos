@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+'use client'
 import {
   Bar, BarChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
-import { obterDespesas, obterResumo, type PaginaDespesas, type Resumo } from '../lib/api'
-import { formatarBRL, formatarData } from '../lib/formato'
+import type { Resumo } from '@/lib/tipos'
+import { formatarBRL } from '@/lib/formato'
+import { TabelaDespesas } from './TabelaDespesas'
 
 // Paleta dark validada (dataviz, superfície #11221a). Cores por RANK da fatia:
 // a adjacência circular 1→…→6→1 é fixa; o pior par adjacente (10,3, faixa-piso)
@@ -12,42 +12,7 @@ import { formatarBRL, formatarData } from '../lib/formato'
 const CORES_ROSCA = ['#3987e5', '#199e70', '#c98500', '#008300', '#9085e9', '#e66767']
 const MAX_FATIAS = 5 // além disso, agrega em "Outras" (regra: >7 classes nunca)
 
-export default function Perfil() {
-  const { id } = useParams<{ id: string }>()
-  const [resumo, setResumo] = useState<Resumo | null>(null)
-  const [despesas, setDespesas] = useState<PaginaDespesas | null>(null)
-  const [ano, setAno] = useState<number | undefined>()
-  const [categoria, setCategoria] = useState('')
-  const [pagina, setPagina] = useState(1)
-  const [erro, setErro] = useState('')
-
-  useEffect(() => {
-    setResumo(null)
-    setDespesas(null)
-    setErro('')
-    setAno(undefined)
-    setCategoria('')
-    setPagina(1)
-    if (!id) return
-    let ativo = true
-    obterResumo(id)
-      .then((r) => { if (ativo) setResumo(r) })
-      .catch((e) => { if (ativo) setErro(e.message) })
-    return () => { ativo = false }
-  }, [id])
-
-  useEffect(() => {
-    if (!id) return
-    let ativo = true
-    obterDespesas(id, { ano, categoria: categoria || undefined, pagina, ordenar: '-data' })
-      .then((d) => { if (ativo) setDespesas(d) })
-      .catch((e) => { if (ativo) setErro(e.message) })
-    return () => { ativo = false }
-  }, [id, ano, categoria, pagina])
-
-  if (erro) return <p className="cartao">⚠️ {erro}</p>
-  if (!resumo) return <p>Carregando...</p>
-
+export function Perfil({ resumo }: { resumo: Resumo }) {
   const { politico } = resumo
   const categoriasComGasto = resumo.por_categoria.filter((c) => c.total > 0)
   const fatias =
@@ -60,7 +25,6 @@ export default function Perfil() {
             total: categoriasComGasto.slice(MAX_FATIAS).reduce((s, c) => s + c.total, 0),
           },
         ]
-  const totalPaginas = despesas ? Math.max(1, Math.ceil(despesas.total_itens / despesas.por_pagina)) : 1
 
   return (
     <div>
@@ -133,50 +97,11 @@ export default function Perfil() {
         </table>
       </div>
 
-      <div className="cartao">
-        <h3>Despesas</h3>
-        <div className="filtros">
-          <select value={ano ?? ''} onChange={(e) => { setPagina(1); setAno(e.target.value ? Number(e.target.value) : undefined) }}>
-            <option value="">Todos os anos</option>
-            {resumo.por_ano.map((a) => <option key={a.ano} value={a.ano}>{a.ano}</option>)}
-          </select>
-          <select value={categoria} onChange={(e) => { setPagina(1); setCategoria(e.target.value) }}>
-            <option value="">Todas as categorias</option>
-            {resumo.por_categoria.map((c) => (
-              <option key={c.categoria} value={c.categoria}>{c.categoria}</option>
-            ))}
-          </select>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th><th>Categoria</th><th>Fornecedor</th><th>Detalhe</th>
-              <th className="valor">Valor</th><th>Nota</th>
-            </tr>
-          </thead>
-          <tbody>
-            {despesas?.itens.map((d, i) => (
-              <tr key={i}>
-                <td>{d.data ? formatarData(d.data) : `${d.mes ?? '—'}/${d.ano}`}</td>
-                <td title={d.categoria_original}>{d.categoria}</td>
-                <td>{d.fornecedor ?? '—'}</td>
-                <td>{d.descricao ?? '—'}</td>
-                <td className="valor">{formatarBRL(d.valor)}</td>
-                <td>
-                  {d.documento_url
-                    ? <a href={d.documento_url} target="_blank" rel="noreferrer">📄</a>
-                    : '—'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="paginacao">
-          <button disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>← Anterior</button>
-          <span>Página {pagina} de {totalPaginas} ({despesas?.total_itens ?? 0} despesas)</span>
-          <button disabled={pagina >= totalPaginas} onClick={() => setPagina(pagina + 1)}>Próxima →</button>
-        </div>
-      </div>
+      <TabelaDespesas
+        politicoId={resumo.politico.id}
+        anos={resumo.por_ano.map((a) => a.ano)}
+        categorias={resumo.por_categoria.map((c) => c.categoria)}
+      />
     </div>
   )
 }
