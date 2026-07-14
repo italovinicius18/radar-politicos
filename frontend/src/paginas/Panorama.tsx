@@ -175,6 +175,7 @@ export default function Panorama() {
                   {g.politico.nome}
                   <small>{[g.politico.partido, g.politico.uf].filter(Boolean).join('/')}</small>
                 </span>
+                <span className="leader" aria-hidden="true" />
                 <span className="top-valor">{formatarBRLCompacto(g.total)}</span>
               </div>
             </Link>
@@ -202,6 +203,7 @@ export default function Panorama() {
                 {f.fornecedor}
                 <small>{f.cnpj || '—'} · {f.quantidade} notas</small>
               </span>
+              <span className="leader" aria-hidden="true" />
               <span className="top-valor">{formatarBRLCompacto(f.total)}</span>
             </div>
           ))}

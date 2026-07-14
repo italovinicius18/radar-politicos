@@ -8,8 +8,10 @@ export default function App() {
     <BrowserRouter>
       <header className="cabecalho">
         <div className="container">
-          <Link to="/">📡 Radar Políticos</Link>
-          <Link to="/rankings">Rankings</Link>
+          <Link to="/" className="wordmark"><span>▸</span>Radar Políticos</Link>
+          <nav>
+            <Link to="/rankings">Rankings</Link>
+          </nav>
         </div>
       </header>
       <main className="container">
