@@ -8,3 +8,4 @@ frontend/dist/
 .pytest_cache/
 frontend/public/dados/
 frontend/out/
+.wrangler/
