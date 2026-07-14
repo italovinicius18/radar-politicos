@@ -64,10 +64,27 @@ export interface VisaoGeral {
     nota_mais_cara: NotaMaisCara | null
   }
   por_mes: { mes: number; total: number }[]
-  por_casa: { fonte: string; rotulo: string; total: number; parlamentares: number }[]
+  por_casa: { fonte: string; rotulo: string; total: number; parlamentares: number; media: number; mediana: number }[]
   top_gastadores: ItemRanking[]
   top_categorias: { categoria: string; total: number }[]
   top_fornecedores: { fornecedor: string; cnpj: string; total: number; quantidade: number }[]
+  por_partido: { partido: string; parlamentares: number; media: number; mediana: number }[]
+  media_por_uf: { uf: string; parlamentares: number; media: number }[]
+  estatisticas: {
+    fim_de_ano: { ano_ref: number; dezembro: number; media_mensal: number; variacao_pct: number } | null
+    transparencia: { pct_com_documento: number; por_fonte: { fonte: string; rotulo: string; pct: number }[] } | null
+    concentracao_top10_pct: number | null
+    quase_exclusivos: {
+      quantidade: number
+      maior: {
+        fornecedor: string
+        cnpj: string
+        total: number
+        pct_um_parlamentar: number
+        politico: { id: string; nome: string }
+      } | null
+    }
+  }
 }
 
 async function obter<T>(caminho: string, parametros: Record<string, string | number | undefined>): Promise<T> {

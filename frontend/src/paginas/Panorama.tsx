@@ -30,6 +30,8 @@ export default function Panorama() {
   const totalCasas = dados.por_casa.reduce((s, x) => s + x.total, 0)
   const serieMensal = dados.por_mes.map((m) => ({ nome: MESES_ABREV[m.mes - 1], total: m.total }))
   const maxCategoria = dados.top_categorias[0]?.total ?? 0
+  const e = dados.estatisticas
+  const maxUf = dados.media_por_uf[0]?.media ?? 0
 
   return (
     <section>
@@ -69,6 +71,58 @@ export default function Panorama() {
               <Link to={`/politico/${nota.politico.id}`}>{nota.politico.nome}</Link> · {nota.categoria}
             </small>
           )}
+        </div>
+      </div>
+
+      <div className="tiles">
+        <div className="cartao tile">
+          <small>Efeito fim de ano</small>
+          <div className="tile-valor">
+            {e.fim_de_ano
+              ? `${e.fim_de_ano.variacao_pct >= 0 ? '+' : ''}${e.fim_de_ano.variacao_pct.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}%`
+              : '—'}
+          </div>
+          <small>
+            {e.fim_de_ano
+              ? `dez/${e.fim_de_ano.ano_ref} vs média mensal (${formatarBRLCompacto(e.fim_de_ano.media_mensal)})`
+              : 'sem dezembro na base'}
+          </small>
+        </div>
+        <div className="cartao tile">
+          <small>Despesas com nota anexada</small>
+          <div className="tile-valor">
+            {e.transparencia
+              ? `${e.transparencia.pct_com_documento.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}%`
+              : '—'}
+          </div>
+          <small>
+            {e.transparencia
+              ? e.transparencia.por_fonte.map((f) => `${f.rotulo}: ${f.pct.toFixed(0)}%`).join(' · ')
+              : 'sem dados no ano'}
+          </small>
+        </div>
+        <div className="cartao tile">
+          <small>Concentração de fornecedores</small>
+          <div className="tile-valor">
+            {e.concentracao_top10_pct !== null
+              ? `${e.concentracao_top10_pct.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}%`
+              : '—'}
+          </div>
+          <small>do gasto do ano vai para os 10 maiores fornecedores</small>
+        </div>
+        <div className="cartao tile">
+          <small>Fornecedores quase-exclusivos</small>
+          <div className="tile-valor">{e.quase_exclusivos.quantidade}</div>
+          <small>
+            ≥ R$ 50 mil no ano com ≥ 90% de um só parlamentar
+            {e.quase_exclusivos.maior && (
+              <>
+                {' — maior: '}{e.quase_exclusivos.maior.fornecedor} ({formatarBRLCompacto(e.quase_exclusivos.maior.total)},{' '}
+                {e.quase_exclusivos.maior.pct_um_parlamentar.toFixed(0)}% de{' '}
+                <Link to={`/politico/${e.quase_exclusivos.maior.politico.id}`}>{e.quase_exclusivos.maior.politico.nome}</Link>)
+              </>
+            )}
+          </small>
         </div>
       </div>
 
@@ -152,6 +206,66 @@ export default function Panorama() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="graficos">
+        <div className="cartao">
+          <h3>Gasto por partido (por parlamentar)</h3>
+          <div className="tabela-rolavel">
+            <table className="tabela-compacta">
+              <thead>
+                <tr><th>Partido</th><th>Parl.</th><th className="valor">Mediana</th><th className="valor">Média</th></tr>
+              </thead>
+              <tbody>
+                {dados.por_partido.map((p) => (
+                  <tr key={p.partido}>
+                    <td>{p.partido}</td>
+                    <td>{p.parlamentares}</td>
+                    <td className="valor">{formatarBRLCompacto(p.mediana)}</td>
+                    <td className="valor">{formatarBRLCompacto(p.media)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <small className="rodape-nota">Média longe da mediana indica gastador extremo puxando o partido para cima.</small>
+        </div>
+        <div className="cartao">
+          <h3>Média por estado (por parlamentar)</h3>
+          <div className="tabela-rolavel">
+            {dados.media_por_uf.map((u) => (
+              <div key={u.uf} className="minibar-linha">
+                <div className="minibar-rotulo">
+                  <span>{u.uf} <small>({u.parlamentares})</small></span>
+                  <span className="top-valor">{formatarBRLCompacto(u.media)}</span>
+                </div>
+                <div className="minibar-trilha">
+                  <div className="minibar" style={{ width: maxUf ? `${(u.media / maxUf) * 100}%` : 0 }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="cartao">
+        <h3>Por casa (média e mediana por parlamentar)</h3>
+        <table className="tabela-compacta">
+          <thead>
+            <tr><th>Casa</th><th>Parlamentares</th><th className="valor">Mediana</th><th className="valor">Média</th></tr>
+          </thead>
+          <tbody>
+            {dados.por_casa.map((x) => (
+              <tr key={x.fonte}>
+                <td>{x.rotulo}</td>
+                <td>{x.parlamentares}</td>
+                <td className="valor">{formatarBRLCompacto(x.mediana)}</td>
+                <td className="valor">{formatarBRLCompacto(x.media)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <small className="rodape-nota">Os tetos de cota diferem por casa — compare parlamentares dentro da mesma casa.</small>
       </div>
     </section>
   )

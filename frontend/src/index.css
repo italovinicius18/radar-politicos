@@ -50,3 +50,7 @@ button:disabled { opacity: 0.4; cursor: default; }
 .minibar-rotulo { display: flex; justify-content: space-between; font-size: 0.9rem; gap: 0.5rem; }
 .minibar-trilha { background: #eee; border-radius: 4px; height: 8px; margin-top: 0.25rem; }
 .minibar { background: #1d7a4d; height: 8px; border-radius: 4px; min-width: 2px; }
+.tabela-rolavel { max-height: 320px; overflow-y: auto; }
+.tabela-compacta { font-size: 0.85rem; }
+.tabela-compacta th { position: sticky; top: 0; background: #fff; }
+.rodape-nota { color: #666; display: block; margin-top: 0.5rem; }
