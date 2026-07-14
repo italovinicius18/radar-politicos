@@ -24,6 +24,14 @@ export default function App() {
           <Route path="/rankings" element={<Rankings />} />
         </Routes>
       </main>
+      <footer className="rodape">
+        <div className="container">
+          <strong>O Radar Políticos não tem vínculo nem viés político-partidário.</strong>{' '}
+          Todos os dados vêm das bases abertas oficiais — Câmara dos Deputados (CEAP), Senado
+          Federal (CEAPS) e Câmara Legislativa do DF — e são apresentados como publicados, sem
+          edição. O objetivo é dar ao cidadão acesso claro à informação que já é pública.
+        </div>
+      </footer>
     </BrowserRouter>
   )
 }
