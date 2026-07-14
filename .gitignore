@@ -6,7 +6,5 @@ __pycache__/
 node_modules/
 frontend/dist/
 .pytest_cache/
-frontend-next/public/dados/
-frontend-next/out/
 frontend/public/dados/
 frontend/out/
