@@ -8,10 +8,13 @@ export default function App() {
     <BrowserRouter>
       <header className="cabecalho">
         <div className="container">
-          <Link to="/" className="wordmark"><span>▸</span>Radar Políticos</Link>
+          <Link to="/" className="wordmark"><span>⦿</span>Radar Políticos</Link>
           <nav>
             <Link to="/rankings">Rankings</Link>
           </nav>
+          <span className="status-base">
+            base: <b>3 casas</b> · Câmara · Senado · CLDF · <b>2013–2026</b>
+          </span>
         </div>
       </header>
       <main className="container">

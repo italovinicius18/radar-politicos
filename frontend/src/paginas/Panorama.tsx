@@ -7,7 +7,7 @@ import { infoFonte } from '../lib/fontes'
 
 const ANOS = Array.from({ length: 14 }, (_, i) => 2013 + i)
 // Cores validadas (dataviz): verde de marca de gráfico
-const COR_MARCA = '#1d7a4d'
+const COR_MARCA = '#199e70' // marca dark validada (dataviz, superfície #11221a)
 
 export default function Panorama() {
   const [dados, setDados] = useState<VisaoGeral | null>(null)
@@ -112,7 +112,7 @@ export default function Panorama() {
         </div>
         <div className="cartao tile">
           <small>Fornecedores quase-exclusivos</small>
-          <div className="tile-valor">{e.quase_exclusivos.quantidade}</div>
+          <div className="tile-valor alerta">{e.quase_exclusivos.quantidade}</div>
           <small>
             ≥ R$ 50 mil no ano com ≥ 90% de um só parlamentar
             {e.quase_exclusivos.maior && (

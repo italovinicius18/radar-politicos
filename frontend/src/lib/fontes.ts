@@ -1,10 +1,11 @@
-// Cores validadas pelo verificador do dataviz (par a par sobre #f5f5f2)
+// Cores de gráfico validadas pelo verificador do dataviz para a superfície
+// escura #11221a (modo "Painel de Brasília"): todos os checks PASS.
 export const FONTES: Record<string, { rotulo: string; cor: string }> = {
-  camara: { rotulo: 'Câmara', cor: '#1d7a4d' },
-  senado: { rotulo: 'Senado', cor: '#0369a1' },
-  cldf: { rotulo: 'CLDF', cor: '#a07d10' },
+  camara: { rotulo: 'Câmara', cor: '#199e70' },
+  senado: { rotulo: 'Senado', cor: '#3987e5' },
+  cldf: { rotulo: 'CLDF', cor: '#c98500' },
 }
 
 export function infoFonte(fonte: string): { rotulo: string; cor: string } {
-  return FONTES[fonte] ?? { rotulo: fonte, cor: '#475569' }
+  return FONTES[fonte] ?? { rotulo: fonte, cor: '#8aa694' }
 }
