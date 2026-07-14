@@ -95,6 +95,11 @@ export interface Meta {
   total_despesas: number
 }
 
+export interface RankingsAno {
+  geral: ItemRanking[]
+  por_cargo: Record<string, ItemRanking[]>
+}
+
 export interface DespesasCompactas {
   colunas: string[]
   linhas: (string | number | null)[][]

@@ -1,8 +1,7 @@
-import duckdb
 import pytest
 
 from radar import consultas
-from radar.db import conectar, criar_schema
+from radar.db import conectar
 
 
 @pytest.fixture

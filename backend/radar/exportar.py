@@ -8,6 +8,7 @@ from pathlib import Path
 
 from radar import consultas
 from radar.db import conectar
+from radar.fontes_registro import FONTES
 
 
 def _gravar(caminho: Path, corpo) -> int:
@@ -36,7 +37,16 @@ def exportar(db: str, saida: Path) -> dict:
     grava("politicos.json", politicos)
     for ano in anos:
         grava(f"visao-geral/{ano}.json", consultas.visao_geral(con, ano))
-        grava(f"rankings/{ano}.json", consultas.rankings(con, ano=ano, limite=100))
+        por_cargo = {}
+        for fonte in FONTES.values():
+            cargo = fonte["cargo"]
+            lista = consultas.rankings(con, ano=ano, cargo=cargo, limite=50)
+            if lista:
+                por_cargo[cargo] = lista
+        grava(f"rankings/{ano}.json", {
+            "geral": consultas.rankings(con, ano=ano, limite=100),
+            "por_cargo": por_cargo,
+        })
     for p in politicos:
         pid = p["id"]
         grava(f"perfil/{pid}.json", consultas.resumo(con, pid))
@@ -59,7 +69,7 @@ def exportar(db: str, saida: Path) -> dict:
 def main() -> int:
     p = argparse.ArgumentParser(description="Exporta JSONs estáticos do Radar Políticos")
     p.add_argument("--db", default="../dados/radar.duckdb")
-    p.add_argument("--saida", default="../frontend-next/public/dados")
+    p.add_argument("--saida", default="../frontend/public/dados")
     args = p.parse_args()
     r = exportar(args.db, Path(args.saida))
     print(f"✔ {r['arquivos']:,} arquivos · {r['bytes'] / 1e6:,.1f} MB".replace(",", "."))

@@ -13,7 +13,8 @@ interface Linha {
 
 export function TabelaDespesas({ politicoId, anos, categorias }:
   { politicoId: string; anos: number[]; categorias: string[] }) {
-  const [ano, setAno] = useState(Math.max(...anos))
+  const ano0 = anos.length ? Math.max(...anos) : 0
+  const [ano, setAno] = useState(ano0)
   const [linhas, setLinhas] = useState<Linha[] | null>(null)
   const [categoria, setCategoria] = useState('')
   const [ordenar, setOrdenar] = useState<'-data' | '-valor'>('-data')
@@ -21,6 +22,7 @@ export function TabelaDespesas({ politicoId, anos, categorias }:
   const [erro, setErro] = useState('')
 
   useEffect(() => {
+    if (!ano) return
     let ativo = true
     setLinhas(null)
     fetch(`/dados/despesas/${politicoId}.json`)
@@ -49,6 +51,15 @@ export function TabelaDespesas({ politicoId, anos, categorias }:
 
   const totalPaginas = Math.max(1, Math.ceil(filtradas.length / POR_PAGINA))
   const visiveis = filtradas.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA)
+
+  if (anos.length === 0) {
+    return (
+      <div className="cartao">
+        <h3>Despesas</h3>
+        <p>Nenhuma despesa registrada.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="cartao">

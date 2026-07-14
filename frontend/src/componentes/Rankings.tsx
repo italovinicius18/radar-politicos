@@ -1,17 +1,17 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import type { ItemRanking } from '@/lib/tipos'
+import type { RankingsAno } from '@/lib/tipos'
 import { formatarBRL } from '@/lib/formato'
 
-export function Rankings({ anos, anoInicial, itensIniciais }: {
+export function Rankings({ anos, anoInicial, dadosIniciais }: {
   anos: number[]
   anoInicial: number
-  itensIniciais: ItemRanking[]
+  dadosIniciais: RankingsAno
 }) {
   const [ano, setAno] = useState(anoInicial)
   const [cargo, setCargo] = useState('')
-  const [itens, setItens] = useState<ItemRanking[]>(itensIniciais)
+  const [dados, setDados] = useState<RankingsAno>(dadosIniciais)
   const [erro, setErro] = useState('')
   const primeiraRenderizacao = useRef(true)
 
@@ -23,12 +23,12 @@ export function Rankings({ anos, anoInicial, itensIniciais }: {
     let ativo = true
     fetch(`/dados/rankings/${ano}.json`)
       .then((r) => { if (!r.ok) throw new Error(`Erro ${r.status}`); return r.json() })
-      .then((d: ItemRanking[]) => { if (ativo) { setItens(d); setErro('') } })
+      .then((d: RankingsAno) => { if (ativo) { setDados(d); setErro('') } })
       .catch((e) => { if (ativo) setErro(e.message) })
     return () => { ativo = false }
   }, [ano])
 
-  const itensFiltrados = itens.filter((i) => !cargo || i.politico.cargo === cargo)
+  const itensExibidos = cargo ? (dados.por_cargo[cargo] ?? []) : dados.geral
 
   return (
     <div>
@@ -46,22 +46,26 @@ export function Rankings({ anos, anoInicial, itensIniciais }: {
       </div>
       {erro && <p className="cartao">⚠️ {erro}</p>}
       <div className="cartao">
-        <table>
-          <thead>
-            <tr><th>#</th><th>Político</th><th>Cargo</th><th>Partido/UF</th><th className="valor">Total</th></tr>
-          </thead>
-          <tbody>
-            {itensFiltrados.map((item, i) => (
-              <tr key={item.politico.id}>
-                <td>{i + 1}º</td>
-                <td><Link href={`/politico/${item.politico.id}`}>{item.politico.nome}</Link></td>
-                <td>{item.politico.cargo}</td>
-                <td>{[item.politico.partido, item.politico.uf].filter(Boolean).join('/') || '—'}</td>
-                <td className="valor">{formatarBRL(item.total)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {itensExibidos.length === 0 ? (
+          <p>Nenhum parlamentar deste cargo no ano.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr><th>#</th><th>Político</th><th>Cargo</th><th>Partido/UF</th><th className="valor">Total</th></tr>
+            </thead>
+            <tbody>
+              {itensExibidos.map((item, i) => (
+                <tr key={item.politico.id}>
+                  <td>{i + 1}º</td>
+                  <td><Link href={`/politico/${item.politico.id}`}>{item.politico.nome}</Link></td>
+                  <td>{item.politico.cargo}</td>
+                  <td>{[item.politico.partido, item.politico.uf].filter(Boolean).join('/') || '—'}</td>
+                  <td className="valor">{formatarBRL(item.total)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   )

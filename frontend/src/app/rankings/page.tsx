@@ -11,6 +11,6 @@ export const metadata: Metadata = {
 export default function Pagina() {
   const meta = lerMeta()
   const anoInicial = meta.ano_max ?? Math.max(...meta.anos)
-  const itensIniciais = lerRankings(anoInicial)
-  return <Rankings anos={meta.anos} anoInicial={anoInicial} itensIniciais={itensIniciais} />
+  const dadosIniciais = lerRankings(anoInicial)
+  return <Rankings anos={meta.anos} anoInicial={anoInicial} dadosIniciais={dadosIniciais} />
 }

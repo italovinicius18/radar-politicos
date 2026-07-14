@@ -45,6 +45,11 @@ def test_paridade_com_consultas(db_amostra, tmp_path):
     assert json.loads((saida / "despesas" / "camara-1.json").read_text()) == (
         consultas.despesas_compactas(con, "camara-1")
     )
+    rankings_2024 = json.loads((saida / "rankings" / "2024.json").read_text())
+    assert rankings_2024["geral"] == consultas.rankings(con, ano=2024)
+    assert rankings_2024["por_cargo"]["Deputado Federal"] == consultas.rankings(
+        con, ano=2024, cargo="Deputado Federal", limite=50
+    )
     con.close()
 
 
