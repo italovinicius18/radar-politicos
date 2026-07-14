@@ -1,7 +1,8 @@
+import { PaginaInicial } from '@/componentes/PaginaInicial'
+import { lerMeta, lerVisaoGeral } from '@/lib/dados-build'
+
 export default function Home() {
-  return (
-    <div>
-      <h1>Radar Políticos</h1>
-    </div>
-  )
+  const meta = lerMeta()
+  const inicial = lerVisaoGeral(meta.ano_max!)
+  return <PaginaInicial inicial={inicial} anos={meta.anos} />
 }
