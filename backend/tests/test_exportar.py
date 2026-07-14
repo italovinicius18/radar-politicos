@@ -59,3 +59,17 @@ def test_reexecucao_e_atomica(db_amostra, tmp_path):
     _exportado(db_amostra, tmp_path)  # segunda execução substitui o diretório inteiro
     assert not (saida / "lixo.json").exists()
     assert (saida / "meta.json").exists()
+
+
+def test_rankings_todos_os_anos(db_amostra, tmp_path):
+    saida = _exportado(db_amostra, tmp_path)
+    todos = json.loads((saida / "rankings" / "todos.json").read_text())
+    con = conectar(db_amostra, somente_leitura=True)
+    assert todos["geral"] == consultas.rankings(con, limite=100)
+    assert todos["por_cargo"]["Deputado Federal"] == consultas.rankings(
+        con, cargo="Deputado Federal", limite=50
+    )
+    # todos os anos: camara-1 soma 2024+2025 (1300 - 200 = 1100)
+    camara1 = next(i for i in todos["geral"] if i["politico"]["id"] == "camara-1")
+    assert camara1["total"] == 1100.0
+    con.close()

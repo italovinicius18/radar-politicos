@@ -3,8 +3,15 @@ import {
   Bar, BarChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
 import type { Resumo } from '@/lib/tipos'
-import { formatarBRL } from '@/lib/formato'
+import { formatarBRL, formatarBRLCompacto } from '@/lib/formato'
 import { TabelaDespesas } from './TabelaDespesas'
+
+function mediana(valores: number[]): number {
+  if (valores.length === 0) return 0
+  const ordenados = [...valores].sort((a, b) => a - b)
+  const meio = Math.floor(ordenados.length / 2)
+  return ordenados.length % 2 ? ordenados[meio] : (ordenados[meio - 1] + ordenados[meio]) / 2
+}
 
 // Paleta dark validada (dataviz, superfície #11221a). Cores por RANK da fatia:
 // a adjacência circular 1→…→6→1 é fixa; o pior par adjacente (10,3, faixa-piso)
@@ -14,6 +21,9 @@ const MAX_FATIAS = 5 // além disso, agrega em "Outras" (regra: >7 classes nunca
 
 export function Perfil({ resumo }: { resumo: Resumo }) {
   const { politico } = resumo
+  const totaisAnuais = resumo.por_ano.map((a) => a.total)
+  const mediaAnual = totaisAnuais.length ? resumo.total / totaisAnuais.length : 0
+  const medianaAnual = mediana(totaisAnuais)
   const categoriasComGasto = resumo.por_categoria.filter((c) => c.total > 0)
   const fatias =
     categoriasComGasto.length <= MAX_FATIAS + 1
@@ -39,6 +49,13 @@ export function Perfil({ resumo }: { resumo: Resumo }) {
           </div>
           <div className="total-destaque">{formatarBRL(resumo.total)}</div>
           <small>total no período disponível (estornos já descontados)</small>
+          {totaisAnuais.length > 0 && (
+            <small>
+              média {formatarBRLCompacto(mediaAnual)}/ano · mediana{' '}
+              {formatarBRLCompacto(medianaAnual)}/ano · {totaisAnuais.length}{' '}
+              {totaisAnuais.length === 1 ? 'ano' : 'anos'} com dados
+            </small>
+          )}
         </div>
       </div>
 
