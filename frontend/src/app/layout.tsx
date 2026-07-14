@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   title: 'Radar Políticos — gastos parlamentares abertos',
   description:
     'Gastos de deputados federais, senadores e deputados distritais (2013–2026), direto das bases abertas oficiais: o quê, com quem, quanto e a nota fiscal.',
+  verification: { google: 'G1QLqEYzUXrD5Ce1PseAPkuJh9sa_Um-lIKbT1GUx6c' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
