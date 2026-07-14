@@ -1,0 +1,22 @@
+name: Diagnóstico de rede das fontes
+on: workflow_dispatch
+
+jobs:
+  diagnostico:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Testar alcance das fontes oficiais
+        run: |
+          testar() {
+            echo "== $1"
+            curl -sS -o /dev/null -w "%{http_code} em %{time_total}s (ip %{remote_ip})\n" \
+              --connect-timeout 15 --max-time 60 -L "$1" || echo "FALHOU: $?"
+          }
+          testar "https://www.camara.leg.br/cotas/Ano-2026.csv.zip"
+          testar "https://dadosabertos.camara.leg.br/api/v2/deputados?itens=1"
+          testar "https://dadosabertos.camara.leg.br/arquivos/cotasParlamentares/csv/cotasParlamentares-2026.csv"
+          testar "https://www.senado.leg.br/transparencia/LAI/verba/despesa_ceaps_2026.csv"
+          testar "https://dados.cl.df.gov.br/api/3/action/package_show?id=verbas-indenizatorias"
+          echo "== IP de saída do runner:"
+          curl -s https://api.ipify.org && echo
