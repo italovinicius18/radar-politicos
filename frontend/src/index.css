@@ -273,6 +273,17 @@ button:disabled { opacity: 0.35; cursor: default; }
 .minibar-trilha { background: rgba(215, 228, 218, 0.08); border-radius: 3px; height: 7px; margin-top: 0.28rem; }
 .minibar { background: var(--marca-verde); height: 7px; border-radius: 3px; min-width: 2px; }
 
+/* ── rodapé institucional ── */
+.rodape {
+  margin-top: 2.2rem;
+  border-top: 1px solid var(--borda);
+  padding: 1.1rem 0 1.6rem;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--texto2);
+}
+.rodape strong { color: var(--texto); font-weight: 600; }
+
 .tabela-rolavel { max-height: 320px; overflow-y: auto; }
 .tabela-compacta { font-size: 0.85rem; }
 .tabela-compacta th { position: sticky; top: 0; background: var(--painel); }
