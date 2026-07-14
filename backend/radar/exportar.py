@@ -35,18 +35,22 @@ def exportar(db: str, saida: Path) -> dict:
     anos = consultas.anos_com_dados(con)
     politicos = consultas.buscar_politicos(con, limite=100_000)
     grava("politicos.json", politicos)
-    for ano in anos:
-        grava(f"visao-geral/{ano}.json", consultas.visao_geral(con, ano))
+    def _rankings(ano: int | None = None) -> dict:
         por_cargo = {}
         for fonte in FONTES.values():
             cargo = fonte["cargo"]
             lista = consultas.rankings(con, ano=ano, cargo=cargo, limite=50)
             if lista:
                 por_cargo[cargo] = lista
-        grava(f"rankings/{ano}.json", {
+        return {
             "geral": consultas.rankings(con, ano=ano, limite=100),
             "por_cargo": por_cargo,
-        })
+        }
+
+    for ano in anos:
+        grava(f"visao-geral/{ano}.json", consultas.visao_geral(con, ano))
+        grava(f"rankings/{ano}.json", _rankings(ano))
+    grava("rankings/todos.json", _rankings())
     for p in politicos:
         pid = p["id"]
         grava(f"perfil/{pid}.json", consultas.resumo(con, pid))

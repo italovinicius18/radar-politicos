@@ -9,7 +9,7 @@ export function Rankings({ anos, anoInicial, dadosIniciais }: {
   anoInicial: number
   dadosIniciais: RankingsAno
 }) {
-  const [ano, setAno] = useState(anoInicial)
+  const [ano, setAno] = useState<number | undefined>(anoInicial)
   const [cargo, setCargo] = useState('')
   const [dados, setDados] = useState<RankingsAno>(dadosIniciais)
   const [erro, setErro] = useState('')
@@ -21,7 +21,7 @@ export function Rankings({ anos, anoInicial, dadosIniciais }: {
       return
     }
     let ativo = true
-    fetch(`/dados/rankings/${ano}.json`)
+    fetch(`/dados/rankings/${ano ?? 'todos'}.json`)
       .then((r) => { if (!r.ok) throw new Error(`Erro ${r.status}`); return r.json() })
       .then((d: RankingsAno) => { if (ativo) { setDados(d); setErro('') } })
       .catch((e) => { if (ativo) setErro(e.message) })
@@ -34,8 +34,12 @@ export function Rankings({ anos, anoInicial, dadosIniciais }: {
     <div>
       <h1>Rankings — quem mais gastou</h1>
       <div className="filtros">
-        <select value={ano} onChange={(e) => setAno(Number(e.target.value))}>
+        <select
+          value={ano ?? ''}
+          onChange={(e) => setAno(e.target.value ? Number(e.target.value) : undefined)}
+        >
           {[...anos].sort((a, b) => b - a).map((a) => <option key={a} value={a}>{a}</option>)}
+          <option value="">Todos os anos</option>
         </select>
         <select value={cargo} onChange={(e) => setCargo(e.target.value)}>
           <option value="">Todos os cargos</option>
@@ -47,7 +51,7 @@ export function Rankings({ anos, anoInicial, dadosIniciais }: {
       {erro && <p className="cartao">⚠️ {erro}</p>}
       <div className="cartao">
         {itensExibidos.length === 0 ? (
-          <p>Nenhum parlamentar deste cargo no ano.</p>
+          <p>Nenhum parlamentar deste cargo no período.</p>
         ) : (
           <table>
             <thead>
