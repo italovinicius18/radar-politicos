@@ -6,9 +6,10 @@ import {
 import { obterDespesas, obterResumo, type PaginaDespesas, type Resumo } from '../lib/api'
 import { formatarBRL, formatarData } from '../lib/formato'
 
-// Paleta categórica validada (dataviz, --pairs all sobre #fbfbf8); o WARN de
-// piso CVD (terracota↔âmbar 11,1) é coberto pelos vãos de 2px entre fatias.
-const CORES_ROSCA = ['#1d7a4d', '#0369a1', '#a07d10', '#7c3aed', '#b4451f', '#a54d7e']
+// Paleta dark validada (dataviz, superfície #11221a). Cores por RANK da fatia:
+// a adjacência circular 1→…→6→1 é fixa; o pior par adjacente (10,3, faixa-piso)
+// é coberto pelos vãos de 2px entre fatias + legenda.
+const CORES_ROSCA = ['#3987e5', '#199e70', '#c98500', '#008300', '#9085e9', '#e66767']
 const MAX_FATIAS = 5 // além disso, agrega em "Outras" (regra: >7 classes nunca)
 
 export default function Perfil() {
@@ -85,7 +86,7 @@ export default function Perfil() {
               <XAxis dataKey="ano" />
               <YAxis tickFormatter={(v) => `${Math.round(v / 1000)}k`} width={50} />
               <Tooltip formatter={(v) => formatarBRL(Number(v))} />
-              <Bar dataKey="total" fill="#1d7a4d" radius={[4, 4, 0, 0]} maxBarSize={28} />
+              <Bar dataKey="total" fill="#199e70" radius={[4, 4, 0, 0]} maxBarSize={28} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -100,14 +101,14 @@ export default function Perfil() {
                 innerRadius={50}
                 outerRadius={90}
                 paddingAngle={2}
-                stroke="#fbfbf8"
+                stroke="#11221a"
               >
                 {fatias.map((c, i) => (
                   <Cell key={c.categoria} fill={CORES_ROSCA[i % CORES_ROSCA.length]} />
                 ))}
               </Pie>
               <Tooltip formatter={(v) => formatarBRL(Number(v))} />
-              <Legend formatter={(valor) => <span style={{ color: '#1b2620' }}>{valor}</span>} />
+              <Legend formatter={(valor) => <span style={{ color: '#d7e4da' }}>{valor}</span>} />
             </PieChart>
           </ResponsiveContainer>
         </div>
