@@ -72,7 +72,11 @@ npx serve out
 
 Para desenvolvimento com hot-reload: `npm run dev` (usa os mesmos `public/dados`). API local opcional para debug: `cd backend && uv run uvicorn radar.api.app:app_padrao --factory --port 8010`.
 
-## Publicar
+## Publicação automática (CI/CD)
+
+O workflow [`.github/workflows/publicar.yml`](.github/workflows/publicar.yml) roda **diariamente às 06:00 BRT** (e a cada push na `master`): ingestão → export → testes → build → deploy no Cloudflare Pages. Se qualquer fonte falhar, nada é publicado. Requer dois secrets no repositório: `CLOUDFLARE_API_TOKEN` (token com permissão *Cloudflare Pages → Edit*) e `CLOUDFLARE_ACCOUNT_ID`.
+
+## Publicar manualmente
 
 `frontend/out/` funciona em qualquer hosting estático:
 
