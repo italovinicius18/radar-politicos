@@ -113,17 +113,12 @@ export function Panorama({ inicial, anos }: { inicial: VisaoGeral; anos: number[
           <small>do gasto do ano vai para os 10 maiores fornecedores</small>
         </div>
         <div className="cartao tile">
-          <small>Fornecedores quase-exclusivos</small>
-          <div className="tile-valor alerta">{e.quase_exclusivos.quantidade}</div>
+          <small>Fornecedores de cliente único</small>
+          <div className="tile-valor">{e.quase_exclusivos.quantidade}</div>
           <small>
-            ≥ R$ 50 mil no ano com ≥ 90% de um só parlamentar
-            {e.quase_exclusivos.maior && (
-              <>
-                {' — maior: '}{e.quase_exclusivos.maior.fornecedor} ({formatarBRLCompacto(e.quase_exclusivos.maior.total)},{' '}
-                {e.quase_exclusivos.maior.pct_um_parlamentar.toFixed(0)}% de{' '}
-                <Link href={`/politico/${e.quase_exclusivos.maior.politico.id}`}>{e.quase_exclusivos.maior.politico.nome}</Link>)
-              </>
-            )}
+            faturaram ≥ R$ 50 mil no ano com ≥ 90% vindo de um só gabinete. Comum e legal na
+            cota parlamentar, que dispensa licitação (aluguéis, assessorias locais) — recorte
+            estatístico, não indício de irregularidade.
           </small>
         </div>
       </div>

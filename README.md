@@ -13,7 +13,7 @@
 ## O que dá para ver
 
 - **Busca por político** → perfil com total gasto, evolução ano a ano, gastos por categoria, top fornecedores e a **tabela completa de despesas com link para cada nota fiscal**
-- **Panorama do ano**: total, média por parlamentar, nota mais cara, **efeito fim de ano** (dezembro vs média mensal), **transparência documental** por casa, **concentração de fornecedores** e **fornecedores quase-exclusivos** (≥ R$ 50 mil com ≥ 90% de um único gabinete — o sinal de alerta usado pela Operação Serenata de Amor)
+- **Panorama do ano**: total, média por parlamentar, nota mais cara, **efeito fim de ano** (dezembro vs média mensal), **transparência documental** por casa, **concentração de fornecedores** e **fornecedores de cliente único** (≥ R$ 50 mil com ≥ 90% de um único gabinete — recorte estatístico comum e legal na cota, que dispensa licitação)
 - **Estatísticas**: média e **mediana** de gasto por partido (média longe da mediana = gastador extremo), média por estado e por casa
 - **Rankings** de maiores gastadores por ano e por cargo
 
@@ -111,4 +111,4 @@ A URL pública fica em um único lugar: `frontend/src/lib/site.ts` (usada em `me
 
 ## Neutralidade
 
-**O Radar Políticos não tem vínculo nem viés político-partidário.** Todos os dados vêm das bases abertas oficiais e são apresentados como publicados, sem edição. Indicadores como "fornecedores quase-exclusivos" são filtros de atenção estatísticos, não acusações. O objetivo é dar ao cidadão acesso claro à informação que já é pública.
+**O Radar Políticos não tem vínculo nem viés político-partidário.** Todos os dados vêm das bases abertas oficiais e são apresentados como publicados, sem edição. Indicadores como "fornecedores de cliente único" são recortes estatísticos de um regime que dispensa licitação — não são acusações nem indícios de irregularidade. O objetivo é dar ao cidadão acesso claro à informação que já é pública.
